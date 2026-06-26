@@ -1,3 +1,8 @@
 {
-  "outputDirectory": "gym-pwa-dist/dist"
+  "buildCommand": "cd apps/aristo && npm install && npm run build && cd ../.. && mkdir -p public_out/aristo && cp -r apps/aristo/dist/. public_out/aristo/ && cp apps/landing/index.html public_out/index.html",
+  "outputDirectory": "public_out",
+  "rewrites": [
+    { "source": "/aristo", "destination": "/aristo/index.html" },
+    { "source": "/aristo/(.*)", "destination": "/aristo/$1" }
+  ]
 }
