@@ -1,12 +1,32 @@
 # Belhssan Platform — Project State
 
-## What this is
-Personal multi-tool platform. One repo, one Vercel deployment, one domain (belhssan.com — not yet purchased).
+## Platform vision
+Belhssan is a personal multi-tool platform — one website, one domain, one repo. Tools are vibe-coded by the owner (with AI) for personal use, and may eventually be shared with friends/entourage. It is intentionally built to grow: every tool added lives at `/toolname/` under the same domain. This is not a single app — it is a platform that will have many tools over time. All future sessions must treat it as such.
+
+## Owner profile
+- Non-technical / low-code background — relies entirely on AI (Claude Code) for all development
+- Prefers batched decisions with minimal back-and-forth before building
+- Comfortable with Anaconda Prompt / terminal for basic commands but not independently
+- GitHub and Vercel beginner — needs explicit step-by-step for any manual actions
+- Primary device: Android phone (PWA install via Chrome)
+- Long-term decisions must be confirmed with owner before implementation, then documented here
+
+## Design preferences
+- Dark themed UI across all tools
+- Clean, minimal interfaces — no clutter
+- Mobile-first
+- English only throughout
+- Naming: platform = Belhssan, each tool gets its own distinct name
+
+## Future tools
+- Audiobooks tracker (mentioned, not started)
+- Family tree tool (mentioned, not started)
+- More to come — owner adds tools they find useful or want to share with entourage
 
 ## Live deployment
 - Vercel project: `belhssan-v1` (account: belhassan)
 - Current live URL: https://belhssan-v1.vercel.app
-- Branch being developed: `claude/project-context-objectives-sopi1x`
+- Development branch: `claude/project-context-objectives-sopi1x` (PR #1 open)
 - Production branch: `main`
 
 ## Repo structure
@@ -34,8 +54,15 @@ vercel.json buildCommand:
 4. Vercel serves public_out/ as the site root
 
 Resulting URLs:
-- `/` → landing page
+- `/` → landing page (Belhssan homepage)
 - `/aristo/` → Aristo app
+
+## Adding a new tool
+1. Create `apps/<toolname>/` with its own package.json + vite.config.js (set `base: '/<toolname>/'`)
+2. Add build step to vercel.json buildCommand
+3. Add link card to `apps/landing/index.html`
+4. Add rewrite rule to vercel.json rewrites
+5. Commit + push to branch → Vercel auto-deploys
 
 ## Aristo — tool #1
 Gym + bodyweight fitness tracker. Features:
@@ -46,7 +73,7 @@ Gym + bodyweight fitness tracker. Features:
 - Sparkline chart showing weight progression
 - Edit/delete entries, backdate entries
 - localStorage persistence (single user, single device for now)
-- Pre-loaded history from OCR of user's paper training log (Apr–Jun 2026)
+- Pre-loaded history from OCR of owner's paper training log (Apr–Jun 2026)
 
 ## Data storage
 - Key: `gym-history-v3` in localStorage
@@ -54,18 +81,12 @@ Gym + bodyweight fitness tracker. Features:
 - Entry: `{ date, weight, sets, reps, notes?, duration? }`
 - No backend — all local. Future plan: add Supabase for cross-device sync + multi-user.
 
-## Adding a new tool
-1. Create `apps/<toolname>/` with its own package.json + vite.config.js (set `base: '/<toolname>/'`)
-2. Add build step to vercel.json buildCommand
-3. Add link card to `apps/landing/index.html`
-4. Add rewrite rule to vercel.json rewrites
-5. Commit + push
+## Architecture decisions (confirmed)
+- Option A monorepo — one Vercel project, all tools in one repo under one domain
+- PWA over native app for now — installable from Chrome on Android
+- No auth/login for now — site is public but not indexed by search engines
+- No database for now — localStorage only. Supabase planned later for Aristo sync + multi-user
+- Long-term decisions require owner confirmation before implementation
 
 ## Leftover junk on main branch
-The old `gym-tracker/` and `gym-pwa-dist/` folders still exist on main (from manual uploads during initial setup). They don't affect builds but should be cleaned up eventually. They do NOT exist on the development branch.
-
-## Key decisions made
-- Option A monorepo (single Vercel project, all tools together) — chosen for simplicity
-- PWA not native app — installable from Chrome on Android, works offline
-- No auth/login for now — site is public but not indexed
-- AI-only development (Claude Code)
+The old `gym-tracker/` and `gym-pwa-dist/` folders still exist on main (from manual uploads during initial setup). They do not affect builds but should be deleted when convenient.
