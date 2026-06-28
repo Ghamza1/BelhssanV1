@@ -88,7 +88,8 @@ function computeLayout(people,boxSize='md'){
   const obg={},placed=new Set()
   // Only place in-law spouses (no parents in dataset) immediately adjacent;
   // spouses with parents get placed when their own bio-family subtree is processed
-  function place(id){if(placed.has(id))return;placed.add(id);const g=gen[id];if(!obg[g])obg[g]=[];obg[g].push(id);const p=byId[id];if(!p)return;p.rels.spouses.forEach(s=>{if(!placed.has(s)&&byId[s]&&!hasP.has(s)){placed.add(s);obg[g].push(s)}});p.rels.children.forEach(c=>{if(!placed.has(c)&&byId[c])place(c)})}
+  function place(id){if(placed.has(id))return;placed.add(id);const g=gen[id];if(!obg[g])obg[g]=[];obg[g].push(id);const p=byId[id];if(!p)return;p.rels.spouses.forEach(s=>{if(!placed.has(s)&&byId[s]&&!hasP.has(s)){placed.add(s);obg[g].push(s)}});// Sort children: those married into another family go last so they land on the outer edge
+  const kids=[...p.rels.children].sort((a,b)=>{const aB=byId[a]?.rels.spouses.some(s=>byId[s]&&hasP.has(s))?1:0,bB=byId[b]?.rels.spouses.some(s=>byId[s]&&hasP.has(s))?1:0;return aB-bB});kids.forEach(c=>{if(!placed.has(c)&&byId[c])place(c)})}
   roots.forEach(r=>place(r.id));people.forEach(p=>{if(!placed.has(p.id))place(p.id)})
   // Post-process: ensure spouses in the same generation are adjacent
   Object.keys(obg).map(Number).forEach(g=>{const done=new Set(),reord=[];(obg[g]||[]).forEach(id=>{if(done.has(id))return;done.add(id);reord.push(id);byId[id]?.rels.spouses.forEach(s=>{if(!done.has(s)&&byId[s]&&gen[s]===g){done.add(s);reord.push(s)}})});obg[g]=reord})
@@ -97,6 +98,8 @@ function computeLayout(people,boxSize='md'){
   const allX0=Object.values(positions).map(p=>p.x),off=-Math.min(...allX0)-(Math.max(...allX0)+NW-Math.min(...allX0))/2
   Object.keys(positions).forEach(id=>{positions[id].x+=off})
   for(let pass=0;pass<3;pass++){gens.slice().reverse().forEach(g=>{const done=new Set();(obg[g]||[]).forEach(id=>{if(done.has(id))return;const p=byId[id];if(!p||!p.rels.children.length)return;const unit=[id,...p.rels.spouses.filter(s=>gen[s]===g&&byId[s])];unit.forEach(u=>done.add(u));const kids=p.rels.children.filter(c=>positions[c]);if(!kids.length)return;const cMid=(Math.min(...kids.map(c=>positions[c].x))+Math.max(...kids.map(c=>positions[c].x))+NW)/2,uMid=(Math.min(...unit.map(u=>positions[u].x))+Math.max(...unit.map(u=>positions[u].x))+NW)/2,d=cMid-uMid;if(Math.abs(d)>1)unit.forEach(u=>{positions[u].x+=d})})})}
+  // De-collision: after centering, ensure no cards overlap within each generation
+  for(let iter=0;iter<3;iter++){gens.forEach(g=>{const ids=(obg[g]||[]).slice().sort((a,b)=>positions[a].x-positions[b].x);for(let i=1;i<ids.length;i++){const prev=positions[ids[i-1]],cur=positions[ids[i]];const isSp=byId[ids[i-1]]?.rels.spouses.includes(ids[i])||byId[ids[i]]?.rels.spouses.includes(ids[i-1]);const minX=prev.x+NW+(isSp?SGAP:HGAP);if(cur.x<minX)cur.x=minX}})}
   const edges=[],seen=new Set()
   people.forEach(p=>{const pp=positions[p.id];if(!pp)return;p.rels.spouses.forEach(sid=>{const k=[p.id,sid].sort().join('~');if(seen.has(k))return;seen.add(k);const sp=positions[sid];if(!sp)return;edges.push({type:'spouse',x1:pp.x+NW,y1:pp.y+NH/2,x2:sp.x,y2:sp.y+NH/2,id:k})});p.rels.children.forEach(cid=>{const k=`${p.id}>${cid}`;if(seen.has(k))return;seen.add(k);const cp=positions[cid];if(!cp)return;let cox=null;p.rels.spouses.forEach(sid=>{const sp=byId[sid];if(sp&&sp.rels.children.includes(cid))cox=positions[sid]});const mx=cox?(pp.x+NW/2+cox.x+NW/2)/2:pp.x+NW/2,my=pp.y+NH+VGAP/2;edges.push({type:'parent-child',path:`M${mx} ${pp.y+NH}L${mx} ${my}L${cp.x+NW/2} ${my}L${cp.x+NW/2} ${cp.y}`,id:k})})})
   const axf=Object.values(positions).map(p=>p.x),ayf=Object.values(positions).map(p=>p.y)
