@@ -12,10 +12,10 @@ const FONT = {
   it:{ display:"'Fraunces', serif",       body:"'Manrope', sans-serif" },
 }
 const T = {
-  ar:{app:'أصلي',tagline:'شجرة العائلة',add:'إضافة شخص',search:'بحث في العائلة...',close:'إغلاق',edit:'تعديل',delete:'حذف',save:'حفظ',cancel:'إلغاء',firstName:'الاسم',lastName:'اللقب العائلي',nickname:'الكنية',maiden:'اسم العائلة قبل الزواج',middleName:'الاسم الأوسط',sex:'الجنس',male:'ذكر',female:'أنثى',born:'الميلاد',died:'الوفاة',place:'المكان',bio:'السيرة الذاتية',job:'المهنة',company:'الشركة',phone:'الهاتف',email:'البريد الإلكتروني',address:'العنوان',notes:'ملاحظات',interests:'الاهتمامات',father:'الأب',mother:'الأم',spouses:'الزوج/الزوجة',children:'الأبناء',relations:'العلاقات العائلية',childOf:'ابن/ابنة لـ',spouseOf:'زوج/زوجة لـ',root:'شخص مستقل',photo:'صورة',changePhoto:'تغيير الصورة',removePhoto:'حذف الصورة',deleteWarn:'حذف هذا الشخص نهائياً؟',noMatch:'لا توجد نتائج',addChild:'+ ابن/ابنة',addSpouse:'+ زوج/زوجة',deceased:'متوفى',alive:'على قيد الحياة',contactInfo:'معلومات التواصل',noParent:'لا يوجد (جذر العائلة)',emptyTree:'أضف أول فرد من العائلة',settings:'إعدادات',cardDetail:'تفاصيل البطاقة',showPhotos:'عرض الصور',cardSize:'حجم البطاقات',detailName:'الاسم فقط',detailNameYear:'الاسم + السنة',detailFull:'الاسم + السنة + المهنة',sizeSm:'صغير',sizeMd:'متوسط',sizeLg:'كبير',fitScreen:'ملاءمة الشاشة',viewFull:'عرض كامل',viewPartial:'عرض مُركَّز',relativeTo:'علاقة بشخص موجود',gedcomExport:'تصدير GEDCOM',gedcomImport:'استيراد GEDCOM',jsonExport:'تصدير JSON',jsonImport:'استيراد JSON',enterPassword:'أدخل كلمة المرور',adminMode:'مدير',guestMode:'زائر',wrongPassword:'كلمة المرور غير صحيحة',logout:'خروج',surnameFirst:'اللقب أولاً',showMaidenName:'إظهار اسم ما قبل الزواج',nameOptions:'خيارات الاسم',colorSettings:'ألوان الواجهة',resetColors:'إعادة تعيين',colorBg:'الخلفية',colorMale:'لون الذكر',colorFemale:'لون الأنثى',colorGold:'لون التمييز',colorInk:'لون النص',genUp:'أجيال للأعلى',genDown:'أجيال للأسفل',tabDisplay:'العرض',tabColors:'الألوان',tabData:'البيانات',importWarning:'سيُستبدل المحتوى الحالي. هل أنت متأكد؟'},
-  fr:{app:'Asli',tagline:'Arbre généalogique',add:'Ajouter',search:'Rechercher...',close:'Fermer',edit:'Modifier',delete:'Supprimer',save:'Enregistrer',cancel:'Annuler',firstName:'Prénom',lastName:'Nom',nickname:'Surnom',maiden:'Nom de jeune fille',middleName:'Deuxième prénom',sex:'Sexe',male:'Homme',female:'Femme',born:'Naissance',died:'Décès',place:'Lieu',bio:'Biographie',job:'Profession',company:'Entreprise',phone:'Téléphone',email:'E-mail',address:'Adresse',notes:'Notes',interests:'Intérêts',father:'Père',mother:'Mère',spouses:'Conjoint(e)',children:'Enfants',relations:'Relations familiales',childOf:'Enfant de',spouseOf:'Conjoint(e) de',root:'Personne indépendante',photo:'Photo',changePhoto:'Changer',removePhoto:'Supprimer',deleteWarn:'Supprimer définitivement ?',noMatch:'Aucun résultat',addChild:'+ Enfant',addSpouse:'+ Conjoint(e)',deceased:'Décédé(e)',alive:'Vivant(e)',contactInfo:'Coordonnées',noParent:'Aucun (racine)',emptyTree:'Ajoutez le premier membre',settings:'Paramètres',cardDetail:'Détail',showPhotos:'Afficher photos',cardSize:'Taille cartes',detailName:'Nom seul',detailNameYear:'Nom + année',detailFull:'Nom + année + métier',sizeSm:'Petit',sizeMd:'Moyen',sizeLg:'Grand',fitScreen:'Ajuster',viewFull:'Vue complète',viewPartial:'Vue focalisée',relativeTo:'Relation avec',gedcomExport:'Exporter GEDCOM',gedcomImport:'Importer GEDCOM',jsonExport:'Exporter JSON',jsonImport:'Importer JSON',enterPassword:'Mot de passe',adminMode:'Admin',guestMode:'Invité',wrongPassword:'Mot de passe incorrect',logout:'Déconnexion',surnameFirst:'Nom en premier',showMaidenName:'Nom de jeune fille',nameOptions:'Options nom',colorSettings:'Couleurs',resetColors:'Réinitialiser',colorBg:'Fond',colorMale:'Couleur homme',colorFemale:'Couleur femme',colorGold:'Accent',colorInk:'Texte',genUp:'Générations haut',genDown:'Générations bas',tabDisplay:'Affichage',tabColors:'Couleurs',tabData:'Données',importWarning:'Remplacer les données actuelles ?'},
-  en:{app:'Asli',tagline:'Family Tree',add:'Add',search:'Search family...',close:'Close',edit:'Edit',delete:'Delete',save:'Save',cancel:'Cancel',firstName:'First name',lastName:'Last name',nickname:'Nickname',maiden:'Maiden name',middleName:'Middle name',sex:'Sex',male:'Male',female:'Female',born:'Born',died:'Died',place:'Place',bio:'Biography',job:'Occupation',company:'Company',phone:'Phone',email:'Email',address:'Address',notes:'Notes',interests:'Interests',father:'Father',mother:'Mother',spouses:'Spouse',children:'Children',relations:'Family relations',childOf:'Child of',spouseOf:'Spouse of',root:'Independent person',photo:'Photo',changePhoto:'Change',removePhoto:'Remove',deleteWarn:'Permanently delete?',noMatch:'No results',addChild:'+ Child',addSpouse:'+ Spouse',deceased:'Deceased',alive:'Living',contactInfo:'Contact info',noParent:'None (root)',emptyTree:'Add the first family member',settings:'Settings',cardDetail:'Card detail',showPhotos:'Show photos',cardSize:'Card size',detailName:'Name only',detailNameYear:'Name + year',detailFull:'Name + year + job',sizeSm:'Small',sizeMd:'Medium',sizeLg:'Large',fitScreen:'Fit',viewFull:'Full tree',viewPartial:'Focused view',relativeTo:'Relation to',gedcomExport:'Export GEDCOM',gedcomImport:'Import GEDCOM',jsonExport:'Export JSON',jsonImport:'Import JSON',enterPassword:'Enter password',adminMode:'Admin',guestMode:'Guest',wrongPassword:'Wrong password',logout:'Logout',surnameFirst:'Surname first',showMaidenName:'Show maiden name',nameOptions:'Name options',colorSettings:'Colors',resetColors:'Reset colors',colorBg:'Background',colorMale:'Male color',colorFemale:'Female color',colorGold:'Accent',colorInk:'Text',genUp:'Generations up',genDown:'Generations down',tabDisplay:'Display',tabColors:'Colors',tabData:'Data',importWarning:'Replace current data?'},
-  it:{app:'Asli',tagline:'Albero genealogico',add:'Aggiungi',search:'Cerca...',close:'Chiudi',edit:'Modifica',delete:'Elimina',save:'Salva',cancel:'Annulla',firstName:'Nome',lastName:'Cognome',nickname:'Soprannome',maiden:'Nome da nubile',middleName:'Secondo nome',sex:'Sesso',male:'Maschio',female:'Femmina',born:'Nascita',died:'Morte',place:'Luogo',bio:'Biografia',job:'Professione',company:'Azienda',phone:'Telefono',email:'Email',address:'Indirizzo',notes:'Note',interests:'Interessi',father:'Padre',mother:'Madre',spouses:'Coniuge',children:'Figli',relations:'Relazioni familiari',childOf:'Figlio/a di',spouseOf:'Coniuge di',root:'Persona indipendente',photo:'Foto',changePhoto:'Cambia',removePhoto:'Rimuovi',deleteWarn:'Eliminare definitivamente?',noMatch:'Nessun risultato',addChild:'+ Figlio/a',addSpouse:'+ Coniuge',deceased:'Deceduto/a',alive:'In vita',contactInfo:'Contatti',noParent:'Nessuno (radice)',emptyTree:'Aggiungi il primo membro',settings:'Impostazioni',cardDetail:'Dettaglio',showPhotos:'Mostra foto',cardSize:'Dimensione',detailName:'Solo nome',detailNameYear:'Nome + anno',detailFull:'Nome + anno + lavoro',sizeSm:'Piccolo',sizeMd:'Medio',sizeLg:'Grande',fitScreen:'Adatta',viewFull:'Albero completo',viewPartial:'Vista focalizzata',relativeTo:'Relazione con',gedcomExport:'Esporta GEDCOM',gedcomImport:'Importa GEDCOM',jsonExport:'Esporta JSON',jsonImport:'Importa JSON',enterPassword:'Password',adminMode:'Admin',guestMode:'Ospite',wrongPassword:'Password errata',logout:'Esci',surnameFirst:'Cognome prima',showMaidenName:'Nome da nubile',nameOptions:'Opzioni nome',colorSettings:'Colori',resetColors:'Ripristina',colorBg:'Sfondo',colorMale:'Colore maschile',colorFemale:'Colore femminile',colorGold:'Accento',colorInk:'Testo',genUp:'Generazioni su',genDown:'Generazioni giù',tabDisplay:'Visualizzazione',tabColors:'Colori',tabData:'Dati',importWarning:'Sostituire i dati attuali?'},
+  ar:{app:'أصلي',tagline:'شجرة العائلة',families:'العائلات',newFamily:'عائلة جديدة',familyName:'اسم العائلة',backToFamilies:'← العائلات',deleteFamily:'حذف العائلة',emptyFamilies:'لا توجد عائلات بعد',peopleCount:'شخص',add:'إضافة شخص',search:'بحث في العائلة...',close:'إغلاق',edit:'تعديل',delete:'حذف',save:'حفظ',cancel:'إلغاء',firstName:'الاسم',lastName:'اللقب العائلي',nickname:'الكنية',maiden:'اسم العائلة قبل الزواج',middleName:'الاسم الأوسط',sex:'الجنس',male:'ذكر',female:'أنثى',born:'الميلاد',died:'الوفاة',place:'المكان',bio:'السيرة الذاتية',job:'المهنة',company:'الشركة',phone:'الهاتف',email:'البريد الإلكتروني',address:'العنوان',notes:'ملاحظات',interests:'الاهتمامات',father:'الأب',mother:'الأم',spouses:'الزوج/الزوجة',children:'الأبناء',relations:'العلاقات العائلية',childOf:'ابن/ابنة لـ',spouseOf:'زوج/زوجة لـ',root:'شخص مستقل',photo:'صورة',changePhoto:'تغيير الصورة',removePhoto:'حذف الصورة',deleteWarn:'حذف هذا الشخص نهائياً؟',noMatch:'لا توجد نتائج',addChild:'+ ابن/ابنة',addSpouse:'+ زوج/زوجة',deceased:'متوفى',alive:'على قيد الحياة',contactInfo:'معلومات التواصل',noParent:'لا يوجد (جذر العائلة)',emptyTree:'أضف أول فرد من العائلة',settings:'إعدادات',cardDetail:'تفاصيل البطاقة',showPhotos:'عرض الصور',cardSize:'حجم البطاقات',detailName:'الاسم فقط',detailNameYear:'الاسم + السنة',detailFull:'الاسم + السنة + المهنة',sizeSm:'صغير',sizeMd:'متوسط',sizeLg:'كبير',fitScreen:'ملاءمة الشاشة',viewFull:'عرض كامل',viewPartial:'عرض مُركَّز',relativeTo:'علاقة بشخص موجود',gedcomExport:'تصدير GEDCOM',gedcomImport:'استيراد GEDCOM',jsonExport:'تصدير JSON',jsonImport:'استيراد JSON',enterPassword:'أدخل كلمة المرور',adminMode:'مدير',guestMode:'زائر',wrongPassword:'كلمة المرور غير صحيحة',logout:'خروج',surnameFirst:'اللقب أولاً',showMaidenName:'إظهار اسم ما قبل الزواج',nameOptions:'خيارات الاسم',colorSettings:'ألوان الواجهة',resetColors:'إعادة تعيين',colorBg:'الخلفية',colorMale:'لون الذكر',colorFemale:'لون الأنثى',colorGold:'لون التمييز',colorInk:'لون النص',genUp:'أجيال للأعلى',genDown:'أجيال للأسفل',tabDisplay:'العرض',tabColors:'الألوان',tabData:'البيانات',importWarning:'سيُستبدل المحتوى الحالي. هل أنت متأكد؟'},
+  fr:{app:'Asli',tagline:'Arbre généalogique',families:'Familles',newFamily:'Nouvelle famille',familyName:'Nom de la famille',backToFamilies:'← Familles',deleteFamily:'Supprimer la famille',emptyFamilies:'Aucune famille',peopleCount:'personne(s)',add:'Ajouter',search:'Rechercher...',close:'Fermer',edit:'Modifier',delete:'Supprimer',save:'Enregistrer',cancel:'Annuler',firstName:'Prénom',lastName:'Nom',nickname:'Surnom',maiden:'Nom de jeune fille',middleName:'Deuxième prénom',sex:'Sexe',male:'Homme',female:'Femme',born:'Naissance',died:'Décès',place:'Lieu',bio:'Biographie',job:'Profession',company:'Entreprise',phone:'Téléphone',email:'E-mail',address:'Adresse',notes:'Notes',interests:'Intérêts',father:'Père',mother:'Mère',spouses:'Conjoint(e)',children:'Enfants',relations:'Relations familiales',childOf:'Enfant de',spouseOf:'Conjoint(e) de',root:'Personne indépendante',photo:'Photo',changePhoto:'Changer',removePhoto:'Supprimer',deleteWarn:'Supprimer définitivement ?',noMatch:'Aucun résultat',addChild:'+ Enfant',addSpouse:'+ Conjoint(e)',deceased:'Décédé(e)',alive:'Vivant(e)',contactInfo:'Coordonnées',noParent:'Aucun (racine)',emptyTree:'Ajoutez le premier membre',settings:'Paramètres',cardDetail:'Détail',showPhotos:'Afficher photos',cardSize:'Taille cartes',detailName:'Nom seul',detailNameYear:'Nom + année',detailFull:'Nom + année + métier',sizeSm:'Petit',sizeMd:'Moyen',sizeLg:'Grand',fitScreen:'Ajuster',viewFull:'Vue complète',viewPartial:'Vue focalisée',relativeTo:'Relation avec',gedcomExport:'Exporter GEDCOM',gedcomImport:'Importer GEDCOM',jsonExport:'Exporter JSON',jsonImport:'Importer JSON',enterPassword:'Mot de passe',adminMode:'Admin',guestMode:'Invité',wrongPassword:'Mot de passe incorrect',logout:'Déconnexion',surnameFirst:'Nom en premier',showMaidenName:'Nom de jeune fille',nameOptions:'Options nom',colorSettings:'Couleurs',resetColors:'Réinitialiser',colorBg:'Fond',colorMale:'Couleur homme',colorFemale:'Couleur femme',colorGold:'Accent',colorInk:'Texte',genUp:'Générations haut',genDown:'Générations bas',tabDisplay:'Affichage',tabColors:'Couleurs',tabData:'Données',importWarning:'Remplacer les données actuelles ?'},
+  en:{app:'Asli',tagline:'Family Tree',families:'Families',newFamily:'New family',familyName:'Family name',backToFamilies:'← Families',deleteFamily:'Delete family',emptyFamilies:'No families yet',peopleCount:'people',add:'Add',search:'Search family...',close:'Close',edit:'Edit',delete:'Delete',save:'Save',cancel:'Cancel',firstName:'First name',lastName:'Last name',nickname:'Nickname',maiden:'Maiden name',middleName:'Middle name',sex:'Sex',male:'Male',female:'Female',born:'Born',died:'Died',place:'Place',bio:'Biography',job:'Occupation',company:'Company',phone:'Phone',email:'Email',address:'Address',notes:'Notes',interests:'Interests',father:'Father',mother:'Mother',spouses:'Spouse',children:'Children',relations:'Family relations',childOf:'Child of',spouseOf:'Spouse of',root:'Independent person',photo:'Photo',changePhoto:'Change',removePhoto:'Remove',deleteWarn:'Permanently delete?',noMatch:'No results',addChild:'+ Child',addSpouse:'+ Spouse',deceased:'Deceased',alive:'Living',contactInfo:'Contact info',noParent:'None (root)',emptyTree:'Add the first family member',settings:'Settings',cardDetail:'Card detail',showPhotos:'Show photos',cardSize:'Card size',detailName:'Name only',detailNameYear:'Name + year',detailFull:'Name + year + job',sizeSm:'Small',sizeMd:'Medium',sizeLg:'Large',fitScreen:'Fit',viewFull:'Full tree',viewPartial:'Focused view',relativeTo:'Relation to',gedcomExport:'Export GEDCOM',gedcomImport:'Import GEDCOM',jsonExport:'Export JSON',jsonImport:'Import JSON',enterPassword:'Enter password',adminMode:'Admin',guestMode:'Guest',wrongPassword:'Wrong password',logout:'Logout',surnameFirst:'Surname first',showMaidenName:'Show maiden name',nameOptions:'Name options',colorSettings:'Colors',resetColors:'Reset colors',colorBg:'Background',colorMale:'Male color',colorFemale:'Female color',colorGold:'Accent',colorInk:'Text',genUp:'Generations up',genDown:'Generations down',tabDisplay:'Display',tabColors:'Colors',tabData:'Data',importWarning:'Replace current data?'},
+  it:{app:'Asli',tagline:'Albero genealogico',families:'Famiglie',newFamily:'Nuova famiglia',familyName:'Nome famiglia',backToFamilies:'← Famiglie',deleteFamily:'Elimina famiglia',emptyFamilies:'Nessuna famiglia',peopleCount:'persone',add:'Aggiungi',search:'Cerca...',close:'Chiudi',edit:'Modifica',delete:'Elimina',save:'Salva',cancel:'Annulla',firstName:'Nome',lastName:'Cognome',nickname:'Soprannome',maiden:'Nome da nubile',middleName:'Secondo nome',sex:'Sesso',male:'Maschio',female:'Femmina',born:'Nascita',died:'Morte',place:'Luogo',bio:'Biografia',job:'Professione',company:'Azienda',phone:'Telefono',email:'Email',address:'Indirizzo',notes:'Note',interests:'Interessi',father:'Padre',mother:'Madre',spouses:'Coniuge',children:'Figli',relations:'Relazioni familiari',childOf:'Figlio/a di',spouseOf:'Coniuge di',root:'Persona indipendente',photo:'Foto',changePhoto:'Cambia',removePhoto:'Rimuovi',deleteWarn:'Eliminare definitivamente?',noMatch:'Nessun risultato',addChild:'+ Figlio/a',addSpouse:'+ Coniuge',deceased:'Deceduto/a',alive:'In vita',contactInfo:'Contatti',noParent:'Nessuno (radice)',emptyTree:'Aggiungi il primo membro',settings:'Impostazioni',cardDetail:'Dettaglio',showPhotos:'Mostra foto',cardSize:'Dimensione',detailName:'Solo nome',detailNameYear:'Nome + anno',detailFull:'Nome + anno + lavoro',sizeSm:'Piccolo',sizeMd:'Medio',sizeLg:'Grande',fitScreen:'Adatta',viewFull:'Albero completo',viewPartial:'Vista focalizzata',relativeTo:'Relazione con',gedcomExport:'Esporta GEDCOM',gedcomImport:'Importa GEDCOM',jsonExport:'Esporta JSON',jsonImport:'Importa JSON',enterPassword:'Password',adminMode:'Admin',guestMode:'Ospite',wrongPassword:'Password errata',logout:'Esci',surnameFirst:'Cognome prima',showMaidenName:'Nome da nubile',nameOptions:'Opzioni nome',colorSettings:'Colori',resetColors:'Ripristina',colorBg:'Sfondo',colorMale:'Colore maschile',colorFemale:'Colore femminile',colorGold:'Accento',colorInk:'Testo',genUp:'Generazioni su',genDown:'Generazioni giù',tabDisplay:'Visualizzazione',tabColors:'Colori',tabData:'Dati',importWarning:'Sostituire i dati attuali?'},
 }
 
 const INITIAL_DATA = [
@@ -33,11 +33,19 @@ const INITIAL_DATA = [
   {id:'p12',data:{first_name:'رانية',last_name:'المنصوري',middle_name:'',nickname:'',maiden:'',sex:'F',birth:{date:'1995',place:'صفاقس'},death:null,photo:'',bio:'',job:'',company:'',phone:'',email:'',address:'',notes:'',interests:''},rels:{father:'p7',mother:'p4',spouses:[],children:[]}},
 ]
 
-const STORAGE_KEY='asli-data-v1', SETTINGS_KEY='asli-settings-v1'
+const FAMILIES_KEY='asli-families-v1', SETTINGS_KEY='asli-settings-v1'
 const DEFAULT_SETTINGS={cardDetail:'full',showPhotos:true,boxSize:'md',surnameFirst:false,showMaidenName:true,genUp:2,genDown:2,colors:{}}
 
-function loadData(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r)}catch{}return INITIAL_DATA}
-function saveData(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
+function loadFamilies(){
+  try{const r=localStorage.getItem(FAMILIES_KEY);if(r)return JSON.parse(r)}catch{}
+  // Migrate from old single-family key
+  let migData=INITIAL_DATA
+  try{const r=localStorage.getItem('asli-data-v1');if(r)migData=JSON.parse(r)}catch{}
+  const fams=[{id:'fam-default',name:'عائلتي',data:migData,updatedAt:Date.now()}]
+  localStorage.setItem(FAMILIES_KEY,JSON.stringify(fams))
+  return fams
+}
+function saveFamilies(fs){localStorage.setItem(FAMILIES_KEY,JSON.stringify(fs))}
 function loadSettings(){try{const r=localStorage.getItem(SETTINGS_KEY);if(r)return{...DEFAULT_SETTINGS,...JSON.parse(r)}}catch{}return{...DEFAULT_SETTINGS}}
 function saveSettings(s){localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))}
 function genId(){return'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
@@ -72,12 +80,18 @@ function computeLayout(people,boxSize='md'){
   const gen={},hasP=new Set()
   people.forEach(p=>{if(p.rels.father&&byId[p.rels.father])hasP.add(p.id);if(p.rels.mother&&byId[p.rels.mother])hasP.add(p.id)})
   const roots=people.filter(p=>!hasP.has(p.id)&&!p.rels.spouses.some(s=>hasP.has(s)));if(!roots.length){const noP=people.filter(p=>!hasP.has(p.id));roots.push(noP[0]||people[0])}
+  // Process larger bio-families first so their children get placed before in-laws
+  roots.sort((a,b)=>(byId[b]?.rels.children.length||0)-(byId[a]?.rels.children.length||0))
   const vis=new Set(),q=roots.map(r=>[r.id,0])
   while(q.length){const[id,g]=q.shift();if(vis.has(id))continue;vis.add(id);gen[id]=g;const p=byId[id];if(!p)continue;p.rels.spouses.forEach(s=>{if(!vis.has(s)&&byId[s])q.push([s,g])});p.rels.children.forEach(c=>{if(!vis.has(c)&&byId[c])q.push([c,g+1])})}
   people.forEach(p=>{if(gen[p.id]===undefined)gen[p.id]=0})
   const obg={},placed=new Set()
-  function place(id){if(placed.has(id))return;placed.add(id);const g=gen[id];if(!obg[g])obg[g]=[];obg[g].push(id);const p=byId[id];if(!p)return;p.rels.spouses.forEach(s=>{if(!placed.has(s)&&byId[s]){placed.add(s);obg[g].push(s)}});p.rels.children.forEach(c=>{if(!placed.has(c)&&byId[c])place(c)})}
+  // Only place in-law spouses (no parents in dataset) immediately adjacent;
+  // spouses with parents get placed when their own bio-family subtree is processed
+  function place(id){if(placed.has(id))return;placed.add(id);const g=gen[id];if(!obg[g])obg[g]=[];obg[g].push(id);const p=byId[id];if(!p)return;p.rels.spouses.forEach(s=>{if(!placed.has(s)&&byId[s]&&!hasP.has(s)){placed.add(s);obg[g].push(s)}});p.rels.children.forEach(c=>{if(!placed.has(c)&&byId[c])place(c)})}
   roots.forEach(r=>place(r.id));people.forEach(p=>{if(!placed.has(p.id))place(p.id)})
+  // Post-process: ensure spouses in the same generation are adjacent
+  Object.keys(obg).map(Number).forEach(g=>{const done=new Set(),reord=[];(obg[g]||[]).forEach(id=>{if(done.has(id))return;done.add(id);reord.push(id);byId[id]?.rels.spouses.forEach(s=>{if(!done.has(s)&&byId[s]&&gen[s]===g){done.add(s);reord.push(s)}})});obg[g]=reord})
   const positions={},gens=Object.keys(obg).map(Number).sort((a,b)=>a-b)
   gens.forEach(g=>{const ids=obg[g];let cx=0;ids.forEach((id,i)=>{positions[id]={x:cx,y:g*(NH+VGAP)};if(i<ids.length-1){const p=byId[id];cx+=NW+(p&&p.rels.spouses.includes(ids[i+1])?SGAP:HGAP)}})})
   const allX0=Object.values(positions).map(p=>p.x),off=-Math.min(...allX0)-(Math.max(...allX0)+NW-Math.min(...allX0))/2
@@ -352,14 +366,59 @@ function PersonForm({person,data,t,lang,isRTL,mode,relation,settings,onSave,onCa
   )
 }
 
-function Header({t,lang,setLang,isRTL,data,EC,role,settings,focusedId,focusedView,onAdd,onSettings,onFocusPerson,onLogout,onToggleFocused}){
+function FamilyPicker({families,t,lang,isRTL,EC,role,onSelect,onCreate,onDelete,onLogout}){
+  const[newName,setNewName]=useState(''),f=FONT[lang],[creating,setCreating]=useState(false)
+  const submit=()=>{if(!newName.trim())return;onCreate(newName.trim());setNewName('');setCreating(false)}
+  return(
+    <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:EC.bg,overflow:'hidden'}}>
+      <div style={{background:EC.primary,padding:'12px 16px',display:'flex',alignItems:'center',gap:10,flexShrink:0,flexDirection:isRTL?'row-reverse':'row'}}>
+        <div style={{display:'flex',flexDirection:'column',marginInlineEnd:'auto'}}>
+          <div style={{fontSize:20,fontWeight:700,color:'#fff',fontFamily:FONT[lang].display,lineHeight:1}}>{t.app}</div>
+          <div style={{fontSize:9,color:'#ffffff77',fontFamily:'Karla,sans-serif',letterSpacing:1}}>{t.families.toUpperCase()}</div>
+        </div>
+        <div style={{display:'flex',gap:3}}>{['ar','fr','en','it'].map(l=><button key={l} onClick={()=>typeof setLang==='function'&&setLang(l)} style={{background:'transparent',color:'#fff',border:'1px solid #ffffff44',borderRadius:6,padding:'3px 6px',fontSize:10,cursor:'pointer'}}>{l.toUpperCase()}</button>)}</div>
+        {AUTH_REQUIRED&&role&&<button onClick={onLogout} style={{...SX.iconBtn,color:'#ffffff88',fontSize:13}}>⏏</button>}
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:20}}>
+        {!families.length&&<div style={{textAlign:'center',color:C.muted,fontFamily:f.body,padding:40,fontSize:14}}>{t.emptyFamilies}</div>}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:14}}>
+          {families.map(fam=>(
+            <div key={fam.id} onClick={()=>onSelect(fam.id)} style={{background:C.card,borderRadius:16,padding:20,cursor:'pointer',boxShadow:`0 2px 12px ${C.shadow}`,border:`1.5px solid ${C.border}`,display:'flex',flexDirection:'column',gap:8,position:'relative',transition:'box-shadow .15s'}}
+              onMouseEnter={e=>e.currentTarget.style.boxShadow=`0 4px 24px ${C.shadow}`}
+              onMouseLeave={e=>e.currentTarget.style.boxShadow=`0 2px 12px ${C.shadow}`}>
+              <div style={{fontSize:32,textAlign:'center',marginBottom:4}}>🌳</div>
+              <div style={{fontSize:16,fontWeight:700,color:EC.ink,fontFamily:f.display,textAlign:'center'}}>{fam.name}</div>
+              <div style={{fontSize:12,color:C.muted,fontFamily:'Karla,sans-serif',textAlign:'center'}}>{fam.data.length} {t.peopleCount}</div>
+              {role==='admin'&&<button onClick={e=>{e.stopPropagation();if(window.confirm(t.deleteFamily+'?'))onDelete(fam.id)}} style={{position:'absolute',top:10,insetInlineEnd:10,background:'none',border:'none',cursor:'pointer',fontSize:14,color:C.muted,padding:4}}>🗑</button>}
+            </div>
+          ))}
+        </div>
+        {role==='admin'&&<div style={{marginTop:20}}>
+          {creating?(
+            <div style={{background:C.card,borderRadius:14,padding:16,border:`1px solid ${C.border}`,display:'flex',gap:8,flexDirection:isRTL?'row-reverse':'row'}}>
+              <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submit();if(e.key==='Escape')setCreating(false)}}
+                placeholder={t.familyName} style={{flex:1,...SX.input(f)}} dir={isRTL?'rtl':'ltr'}/>
+              <button onClick={submit} style={{background:EC.primary,color:'#fff',border:'none',borderRadius:9,padding:'8px 16px',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:f.body}}>{t.save}</button>
+              <button onClick={()=>{setCreating(false);setNewName('')}} style={{background:C.surface,color:C.muted,border:`1px solid ${C.border}`,borderRadius:9,padding:'8px 12px',cursor:'pointer',fontSize:13,fontFamily:f.body}}>{t.cancel}</button>
+            </div>
+          ):(
+            <button onClick={()=>setCreating(true)} style={{width:'100%',background:C.surface,color:EC.primary,border:`2px dashed ${EC.primary}`,borderRadius:14,padding:'16px',cursor:'pointer',fontSize:14,fontWeight:700,fontFamily:f.body}}>+ {t.newFamily}</button>
+          )}
+        </div>}
+      </div>
+    </div>
+  )
+}
+
+function Header({t,lang,setLang,isRTL,data,EC,role,settings,focusedId,focusedView,currentFamName,onAdd,onSettings,onFocusPerson,onLogout,onToggleFocused,onBackToFamilies}){
   const[search,setSearch]=useState(''),[open,setOpen]=useState(false),f=FONT[lang]
   const results=useMemo(()=>{if(!search.trim())return[];const q=search.toLowerCase();return data.filter(p=>`${p.data.first_name||''} ${p.data.last_name||''} ${p.data.nickname||''} ${p.data.job||''}`.toLowerCase().includes(q)).slice(0,8)},[search,data])
   const pick=id=>{onFocusPerson(id);setSearch('');setOpen(false)}
   return(
     <div style={{background:EC.primary,padding:'10px 14px',display:'flex',alignItems:'center',gap:8,flexShrink:0,position:'relative',flexDirection:isRTL?'row-reverse':'row'}}>
-      <div style={{display:'flex',flexDirection:'column',marginInlineEnd:'auto'}}>
-        <div style={{fontSize:18,fontWeight:700,color:C.white,fontFamily:f.display,lineHeight:1}}>{t.app}</div>
+      {onBackToFamilies&&<button onClick={onBackToFamilies} style={{...SX.iconBtn,color:`${C.white}bb`,fontSize:12,fontFamily:'Karla,sans-serif',fontWeight:600,padding:'4px 8px',border:`1px solid ${C.white}33`,borderRadius:7,whiteSpace:'nowrap'}}>{t.backToFamilies}</button>}
+      <div style={{display:'flex',flexDirection:'column',marginInlineEnd:'auto',minWidth:0}}>
+        <div style={{fontSize:18,fontWeight:700,color:C.white,fontFamily:f.display,lineHeight:1}}>{currentFamName||t.app}</div>
         <div style={{fontSize:9,color:`${C.white}77`,fontFamily:'Karla,sans-serif',letterSpacing:1}}>{t.tagline.toUpperCase()}</div>
       </div>
       {focusedId&&<button onClick={onToggleFocused} title={focusedView?t.viewFull:t.viewPartial} style={{background:focusedView?EC.gold:'transparent',color:C.white,border:`1px solid ${focusedView?EC.gold:`${C.white}44`}`,borderRadius:7,padding:'4px 8px',cursor:'pointer',fontSize:10,fontFamily:'Karla,sans-serif',fontWeight:600}}>{focusedView?'◎':'○'}</button>}
@@ -380,25 +439,41 @@ function Header({t,lang,setLang,isRTL,data,EC,role,settings,focusedId,focusedVie
 }
 
 export default function App(){
-  const[lang,setLang]         =useState(()=>localStorage.getItem('asli-lang')||'ar')
-  const[data,setData]         =useState(loadData)
-  const[settings,setSettings] =useState(loadSettings)
-  const[focusedId,setFocused] =useState(null)
-  const[editingId,setEditing] =useState(null)
-  const[addRel,setAddRel]     =useState(null)
-  const[showSettings,setShowS]=useState(false)
-  const[focusedView,setFV]    =useState(false)
+  const[lang,setLang]          =useState(()=>localStorage.getItem('asli-lang')||'ar')
+  const[families,setFamilies]  =useState(loadFamilies)
+  const[currentFamId,setCurFam]=useState(null)
+  const[settings,setSettings]  =useState(loadSettings)
+  const[focusedId,setFocused]  =useState(null)
+  const[editingId,setEditing]  =useState(null)
+  const[addRel,setAddRel]      =useState(null)
+  const[showSettings,setShowS] =useState(false)
+  const[focusedView,setFV]     =useState(false)
   const[collapsed,setCollapsed]=useState(new Set())
-  const[role,setRole]         =useState(()=>AUTH_REQUIRED?null:'admin')
+  const[role,setRole]          =useState(()=>AUTH_REQUIRED?null:'admin')
   const fitRef=useRef(null)
   const isRTL=lang==='ar',t=T[lang]
   const EC=useMemo(()=>({...C,...(settings.colors||{})}),[settings.colors])
 
+  const currentFamily=families.find(f=>f.id===currentFamId)
+  const data=currentFamily?.data||[]
+
   useEffect(()=>{localStorage.setItem('asli-lang',lang);document.documentElement.lang=lang;document.documentElement.dir=isRTL?'rtl':'ltr'},[lang,isRTL])
-  useEffect(()=>saveData(data),[data])
   useEffect(()=>saveSettings(settings),[settings])
 
-  const updData=useCallback(d=>{setData(d);saveData(d)},[])
+  const updData=useCallback(d=>{
+    setFamilies(prev=>{const next=prev.map(f=>f.id===currentFamId?{...f,data:d,updatedAt:Date.now()}:f);saveFamilies(next);return next})
+  },[currentFamId])
+
+  const openFamily=useCallback(id=>{setCurFam(id);setFocused(null);setCollapsed(new Set());setFV(false)},[])
+  const createFamily=useCallback(name=>{
+    const id=genId(),fam={id,name,data:[],updatedAt:Date.now()}
+    setFamilies(prev=>{const next=[...prev,fam];saveFamilies(next);return next})
+    openFamily(id)
+  },[openFamily])
+  const deleteFamily=useCallback(id=>{
+    setFamilies(prev=>{const next=prev.filter(f=>f.id!==id);saveFamilies(next);return next})
+    if(currentFamId===id)setCurFam(null)
+  },[currentFamId])
 
   const addPerson=useCallback((pd,rel)=>{
     const nid=genId(),np={id:nid,data:pd,rels:{father:null,mother:null,spouses:[],children:[]}}
@@ -414,8 +489,8 @@ export default function App(){
   const deletePerson=useCallback(id=>{if(!window.confirm(t.deleteWarn))return;updData(data.filter(p=>p.id!==id).map(p=>({...p,rels:{father:p.rels.father===id?null:p.rels.father,mother:p.rels.mother===id?null:p.rels.mother,spouses:p.rels.spouses.filter(s=>s!==id),children:p.rels.children.filter(c=>c!==id)}})));setFocused(null)},[data,updData,t.deleteWarn])
   const toggleCollapsed=useCallback(id=>{setCollapsed(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n})},[])
 
-  const handleImportJSON=()=>pickFile('.json',txt=>{try{const p=JSON.parse(txt);if(!Array.isArray(p))throw 0;if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set())}}catch{alert('Invalid JSON')}})
-  const handleImportGEDCOM=()=>pickFile('.ged,.gedcom',txt=>{const p=parseGEDCOM(txt);if(!p.length){alert('No data found');return};if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set())}})
+  const handleImportJSON=()=>pickFile('.json',txt=>{try{const p=JSON.parse(txt);if(!Array.isArray(p))throw 0;if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set());setFV(false)}}catch{alert('Invalid JSON')}})
+  const handleImportGEDCOM=()=>pickFile('.ged,.gedcom',txt=>{const p=parseGEDCOM(txt);if(!p.length){alert('No data found');return};if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set());setFV(false)}})
 
   const visData=useMemo(()=>{let d=data;if(focusedView&&focusedId)d=getFocusedData(d,focusedId,settings.genUp,settings.genDown);return getVisibleData(d,collapsed)},[data,focusedView,focusedId,settings.genUp,settings.genDown,collapsed])
 
@@ -423,10 +498,11 @@ export default function App(){
   const editingPerson=data.find(p=>p.id===editingId)
 
   if(AUTH_REQUIRED&&!role)return<PasswordModal t={t} lang={lang} isRTL={isRTL} onLogin={setRole}/>
+  if(!currentFamId)return<FamilyPicker families={families} t={t} lang={lang} isRTL={isRTL} EC={EC} role={role} onSelect={openFamily} onCreate={createFamily} onDelete={deleteFamily} onLogout={()=>setRole(null)}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:EC.bg,overflow:'hidden'}}>
-      <Header t={t} lang={lang} setLang={l=>setLang(l)} isRTL={isRTL} data={data} EC={EC} role={role} settings={settings} focusedId={focusedId} focusedView={focusedView} onAdd={()=>setAddRel({type:'root',relativeId:null})} onSettings={()=>setShowS(true)} onFocusPerson={id=>{setFocused(id);if(!id)setFV(false)}} onLogout={()=>setRole(null)} onToggleFocused={()=>setFV(v=>!v)}/>
+      <Header t={t} lang={lang} setLang={l=>setLang(l)} isRTL={isRTL} data={data} EC={EC} role={role} settings={settings} focusedId={focusedId} focusedView={focusedView} currentFamName={currentFamily?.name} onAdd={()=>setAddRel({type:'root',relativeId:null})} onSettings={()=>setShowS(true)} onFocusPerson={id=>{setFocused(id);if(!id)setFV(false)}} onLogout={()=>setRole(null)} onToggleFocused={()=>setFV(v=>!v)} onBackToFamilies={()=>setCurFam(null)}/>
       <div style={{flex:1,position:'relative',overflow:'hidden'}}>
         <TreeView visData={visData} fullData={data} focusedId={focusedId} onPersonClick={id=>setFocused(id===focusedId?null:id)} t={t} lang={lang} settings={settings} EC={EC} onFitRef={fitRef} collapsed={collapsed} onCollapseToggle={toggleCollapsed}/>
         {focusedPerson&&!editingId&&!addRel&&!showSettings&&(
