@@ -36,6 +36,14 @@ const INITIAL_DATA = [
 const FAMILIES_KEY='asli-families-v1', SETTINGS_KEY='asli-settings-v1'
 const DEFAULT_SETTINGS={cardDetail:'full',showPhotos:true,boxSize:'md',surnameFirst:false,showMaidenName:true,genUp:2,genDown:2,colors:{}}
 
+const SB_URL=import.meta.env.VITE_SUPABASE_URL||''
+const SB_KEY=import.meta.env.VITE_SUPABASE_ANON_KEY||''
+const HAS_SB=!!(SB_URL&&SB_KEY)
+const sbH={apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,'Content-Type':'application/json'}
+async function sbGet(){if(!HAS_SB)return null;try{const r=await fetch(`${SB_URL}/rest/v1/families?select=*`,{headers:sbH});if(!r.ok)return null;return r.json()}catch{return null}}
+async function sbUpsert(f){if(!HAS_SB)return;try{await fetch(`${SB_URL}/rest/v1/families`,{method:'POST',headers:{...sbH,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:f.id,name:f.name,data:f.data})})}catch{}}
+async function sbDelete(id){if(!HAS_SB)return;try{await fetch(`${SB_URL}/rest/v1/families?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:sbH})}catch{}}
+
 function loadFamilies(){
   try{const r=localStorage.getItem(FAMILIES_KEY);if(r)return JSON.parse(r)}catch{}
   // Migrate from old single-family key
@@ -463,18 +471,45 @@ export default function App(){
   useEffect(()=>{localStorage.setItem('asli-lang',lang);document.documentElement.lang=lang;document.documentElement.dir=isRTL?'rtl':'ltr'},[lang,isRTL])
   useEffect(()=>saveSettings(settings),[settings])
 
+  // On mount: pull from Supabase and merge (remote updated_at wins)
+  useEffect(()=>{
+    if(!HAS_SB)return
+    sbGet().then(remote=>{
+      if(!Array.isArray(remote)||!remote.length)return
+      setFamilies(local=>{
+        const byId=Object.fromEntries(local.map(f=>[f.id,f]))
+        remote.forEach(rf=>{
+          const lf=byId[rf.id]
+          const remoteTs=new Date(rf.updated_at).getTime()
+          if(!lf||!lf.updatedAt||remoteTs>lf.updatedAt)
+            byId[rf.id]={id:rf.id,name:rf.name,data:rf.data,updatedAt:remoteTs}
+        })
+        const merged=Object.values(byId)
+        saveFamilies(merged);return merged
+      })
+    })
+  },[])
+
   const updData=useCallback(d=>{
-    setFamilies(prev=>{const next=prev.map(f=>f.id===currentFamId?{...f,data:d,updatedAt:Date.now()}:f);saveFamilies(next);return next})
+    setFamilies(prev=>{
+      const next=prev.map(f=>f.id===currentFamId?{...f,data:d,updatedAt:Date.now()}:f)
+      saveFamilies(next)
+      const updated=next.find(f=>f.id===currentFamId)
+      if(updated)sbUpsert(updated)
+      return next
+    })
   },[currentFamId])
 
   const openFamily=useCallback(id=>{setCurFam(id);setFocused(null);setCollapsed(new Set());setFV(false)},[])
   const createFamily=useCallback(name=>{
     const id=genId(),fam={id,name,data:[],updatedAt:Date.now()}
     setFamilies(prev=>{const next=[...prev,fam];saveFamilies(next);return next})
+    sbUpsert(fam)
     openFamily(id)
   },[openFamily])
   const deleteFamily=useCallback(id=>{
     setFamilies(prev=>{const next=prev.filter(f=>f.id!==id);saveFamilies(next);return next})
+    sbDelete(id)
     if(currentFamId===id)setCurFam(null)
   },[currentFamId])
 
@@ -493,7 +528,7 @@ export default function App(){
   const toggleCollapsed=useCallback(id=>{setCollapsed(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n})},[])
 
   const handleImportJSON=()=>pickFile('.json',txt=>{try{const p=JSON.parse(txt);if(!Array.isArray(p))throw 0;if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set());setFV(false)}}catch{alert('Invalid JSON')}})
-  const handleImportGEDCOM=()=>pickFile('.ged,.gedcom',txt=>{const p=parseGEDCOM(txt);if(!p.length){alert('No data found');return};if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set());setFV(false)}})
+  const handleImportGEDCOM=()=>pickFile('.ged,.gedcom',txt=>{const p=parseGEDCOM(txt);if(!p.length){alert('No data found');return}if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set());setFV(false)}})
 
   const visData=useMemo(()=>{let d=data;if(focusedView&&focusedId)d=getFocusedData(d,focusedId,settings.genUp,settings.genDown);return getVisibleData(d,collapsed)},[data,focusedView,focusedId,settings.genUp,settings.genDown,collapsed])
 
