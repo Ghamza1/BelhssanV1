@@ -1,9 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   base: '/asli/',
+  resolve: {
+    alias: { '@shared': path.resolve(__dirname, '../shared') }
+  },
   plugins: [
     react(),
     VitePWA({
@@ -24,9 +31,7 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg}']
-      }
+      workbox: { globPatterns: ['**/*.{js,css,html,png,svg}'] }
     })
   ]
 })
