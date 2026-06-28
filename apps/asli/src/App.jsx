@@ -471,21 +471,25 @@ export default function App(){
   useEffect(()=>{localStorage.setItem('asli-lang',lang);document.documentElement.lang=lang;document.documentElement.dir=isRTL?'rtl':'ltr'},[lang,isRTL])
   useEffect(()=>saveSettings(settings),[settings])
 
-  // On mount: pull from Supabase and merge (remote updated_at wins)
+  // On mount: bidirectional sync with Supabase
   useEffect(()=>{
     if(!HAS_SB)return
     sbGet().then(remote=>{
-      if(!Array.isArray(remote)||!remote.length)return
       setFamilies(local=>{
-        const byId=Object.fromEntries(local.map(f=>[f.id,f]))
-        remote.forEach(rf=>{
-          const lf=byId[rf.id]
+        const remoteById=Object.fromEntries((Array.isArray(remote)?remote:[]).map(r=>[r.id,r]))
+        const localById=Object.fromEntries(local.map(f=>[f.id,f]))
+        // Push any local families not in Supabase (e.g. migrated fam-default)
+        local.forEach(lf=>{if(!remoteById[lf.id])sbUpsert(lf)})
+        // Merge: remote wins when its updated_at is newer
+        const merged={...localById}
+        Object.values(remoteById).forEach(rf=>{
+          const lf=localById[rf.id]
           const remoteTs=new Date(rf.updated_at).getTime()
           if(!lf||!lf.updatedAt||remoteTs>lf.updatedAt)
-            byId[rf.id]={id:rf.id,name:rf.name,data:rf.data,updatedAt:remoteTs}
+            merged[rf.id]={id:rf.id,name:rf.name,data:rf.data,updatedAt:remoteTs}
         })
-        const merged=Object.values(byId)
-        saveFamilies(merged);return merged
+        const result=Object.values(merged)
+        saveFamilies(result);return result
       })
     })
   },[])
