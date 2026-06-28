@@ -71,7 +71,7 @@ function computeLayout(people,boxSize='md'){
   const[NW,NH]=BOX[boxSize],byId=Object.fromEntries(people.map(p=>[p.id,p]))
   const gen={},hasP=new Set()
   people.forEach(p=>{if(p.rels.father&&byId[p.rels.father])hasP.add(p.id);if(p.rels.mother&&byId[p.rels.mother])hasP.add(p.id)})
-  const roots=people.filter(p=>!hasP.has(p.id));if(!roots.length)roots.push(people[0])
+  const roots=people.filter(p=>!hasP.has(p.id)&&!p.rels.spouses.some(s=>hasP.has(s)));if(!roots.length){const noP=people.filter(p=>!hasP.has(p.id));roots.push(noP[0]||people[0])}
   const vis=new Set(),q=roots.map(r=>[r.id,0])
   while(q.length){const[id,g]=q.shift();if(vis.has(id))continue;vis.add(id);gen[id]=g;const p=byId[id];if(!p)continue;p.rels.spouses.forEach(s=>{if(!vis.has(s)&&byId[s])q.push([s,g])});p.rels.children.forEach(c=>{if(!vis.has(c)&&byId[c])q.push([c,g+1])})}
   people.forEach(p=>{if(gen[p.id]===undefined)gen[p.id]=0})
