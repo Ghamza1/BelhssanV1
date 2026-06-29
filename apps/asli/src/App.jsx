@@ -41,7 +41,7 @@ const SB_KEY=import.meta.env.VITE_SUPABASE_ANON_KEY||''
 const HAS_SB=!!(SB_URL&&SB_KEY)
 const sbH={apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,'Content-Type':'application/json'}
 async function sbGet(){if(!HAS_SB)return null;try{const r=await fetch(`${SB_URL}/rest/v1/families?select=*`,{headers:sbH});if(!r.ok)return null;return r.json()}catch{return null}}
-async function sbUpsert(f){if(!HAS_SB)return;try{await fetch(`${SB_URL}/rest/v1/families`,{method:'POST',headers:{...sbH,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:f.id,name:f.name,data:f.data,updated_at:new Date().toISOString()})})}catch{}}
+async function sbUpsert(f){if(!HAS_SB)return false;try{const r=await fetch(`${SB_URL}/rest/v1/families`,{method:'POST',headers:{...sbH,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:f.id,name:f.name,data:f.data,updated_at:new Date().toISOString()})});console.log('[Asli] UPSERT',f.id,r.status);if(!r.ok){console.error('[Asli] UPSERT failed',await r.text());return false}return true}catch(e){console.error('[Asli] UPSERT error',e);return false}}
 async function sbDelete(id){if(!HAS_SB)return;try{await fetch(`${SB_URL}/rest/v1/families?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:sbH})}catch{}}
 
 function loadFamilies(){
@@ -421,7 +421,7 @@ function FamilyPicker({families,t,lang,isRTL,EC,role,onSelect,onCreate,onDelete,
   )
 }
 
-function Header({t,lang,setLang,isRTL,data,EC,role,settings,focusedId,focusedView,currentFamName,onAdd,onSettings,onFocusPerson,onLogout,onToggleFocused,onBackToFamilies}){
+function Header({t,lang,setLang,isRTL,data,EC,role,settings,focusedId,focusedView,currentFamName,onAdd,onSettings,onFocusPerson,onLogout,onToggleFocused,onBackToFamilies,onSave,syncStatus}){
   const[search,setSearch]=useState(''),[open,setOpen]=useState(false),f=FONT[lang]
   const results=useMemo(()=>{if(!search.trim())return[];const q=search.toLowerCase();return data.filter(p=>`${p.data.first_name||''} ${p.data.last_name||''} ${p.data.nickname||''} ${p.data.job||''}`.toLowerCase().includes(q)).slice(0,8)},[search,data])
   const pick=id=>{onFocusPerson(id);setSearch('');setOpen(false)}
@@ -441,6 +441,7 @@ function Header({t,lang,setLang,isRTL,data,EC,role,settings,focusedId,focusedVie
           {search&&!results.length&&<div style={{padding:'9px 14px',color:C.muted,fontSize:13,fontFamily:f.body}}>{t.noMatch}</div>}
         </div>}
       </div>
+      {HAS_SB&&onSave&&<button onClick={onSave} style={{background:syncStatus==='ok'?'#22c55e':syncStatus==='err'?'#ef4444':'transparent',color:C.white,border:`1px solid ${syncStatus==='ok'?'#22c55e':syncStatus==='err'?'#ef4444':`${C.white}44`}`,borderRadius:7,padding:'4px 8px',cursor:'pointer',fontSize:10,fontFamily:'Karla,sans-serif',fontWeight:600,transition:'all .3s'}}>{syncStatus==='ok'?'✓ saved':syncStatus==='err'?'✗ failed':'☁ save'}</button>}
       <button onClick={onSettings} style={{...SX.iconBtn,color:C.white,opacity:.85}}>⚙</button>
       {role==='admin'&&<button onClick={onAdd} style={{background:EC.gold,color:C.white,border:'none',borderRadius:9,padding:'7px 13px',cursor:'pointer',fontSize:12,fontWeight:700,fontFamily:f.body,whiteSpace:'nowrap'}}>+ {t.add}</button>}
       <div style={{display:'flex',gap:3}}>{['ar','fr','en','it'].map(l=><button key={l} onClick={()=>setLang(l)} style={{background:lang===l?EC.gold:'transparent',color:C.white,border:`1px solid ${lang===l?EC.gold:`${C.white}44`}`,borderRadius:6,padding:'3px 6px',fontSize:10,cursor:'pointer',fontFamily:'Karla,sans-serif',fontWeight:lang===l?700:400}}>{l.toUpperCase()}</button>)}</div>
@@ -461,6 +462,7 @@ export default function App(){
   const[focusedView,setFV]     =useState(false)
   const[collapsed,setCollapsed]=useState(new Set())
   const[role,setRole]          =useState(()=>AUTH_REQUIRED?null:'admin')
+  const[syncStatus,setSyncStatus]=useState(null)
   const fitRef=useRef(null)
   const isRTL=lang==='ar',t=T[lang]
   const EC=useMemo(()=>({...C,...(settings.colors||{})}),[settings.colors])
@@ -504,6 +506,15 @@ export default function App(){
     })
   },[currentFamId])
 
+  const handleSave=useCallback(async()=>{
+    const fam=families.find(f=>f.id===currentFamId)
+    if(!fam)return
+    setSyncStatus('saving')
+    const ok=await sbUpsert(fam)
+    setSyncStatus(ok?'ok':'err')
+    setTimeout(()=>setSyncStatus(null),3000)
+  },[families,currentFamId])
+
   const openFamily=useCallback(id=>{setCurFam(id);setFocused(null);setCollapsed(new Set());setFV(false)},[])
   const createFamily=useCallback(name=>{
     const id=genId(),fam={id,name,data:[],updatedAt:Date.now()}
@@ -544,7 +555,7 @@ export default function App(){
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:EC.bg,overflow:'hidden'}}>
-      <Header t={t} lang={lang} setLang={l=>setLang(l)} isRTL={isRTL} data={data} EC={EC} role={role} settings={settings} focusedId={focusedId} focusedView={focusedView} currentFamName={currentFamily?.name} onAdd={()=>setAddRel({type:'root',relativeId:null})} onSettings={()=>setShowS(true)} onFocusPerson={id=>{setFocused(id);if(!id)setFV(false)}} onLogout={()=>setRole(null)} onToggleFocused={()=>setFV(v=>!v)} onBackToFamilies={()=>setCurFam(null)}/>
+      <Header t={t} lang={lang} setLang={l=>setLang(l)} isRTL={isRTL} data={data} EC={EC} role={role} settings={settings} focusedId={focusedId} focusedView={focusedView} currentFamName={currentFamily?.name} onAdd={()=>setAddRel({type:'root',relativeId:null})} onSettings={()=>setShowS(true)} onFocusPerson={id=>{setFocused(id);if(!id)setFV(false)}} onLogout={()=>setRole(null)} onToggleFocused={()=>setFV(v=>!v)} onBackToFamilies={()=>setCurFam(null)} onSave={handleSave} syncStatus={syncStatus}/>
       <div style={{flex:1,position:'relative',overflow:'hidden'}}>
         <TreeView visData={visData} fullData={data} focusedId={focusedId} onPersonClick={id=>setFocused(id===focusedId?null:id)} t={t} lang={lang} settings={settings} EC={EC} onFitRef={fitRef} collapsed={collapsed} onCollapseToggle={toggleCollapsed}/>
         {focusedPerson&&!editingId&&!addRel&&!showSettings&&(
