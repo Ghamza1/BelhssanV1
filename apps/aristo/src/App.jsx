@@ -1,6 +1,30 @@
 import { useState, useEffect } from "react";
 
-const STORAGE_KEY = "gym-history-v3";
+const PEOPLE = [
+  { id: 'ahmed', name: 'Ahmed' },
+  { id: 'fares', name: 'Fares' },
+];
+
+function storageKey(personId) { return `gym-history-${personId}`; }
+
+function PersonPicker({ onSelect }) {
+  return (
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', color: '#fff', fontFamily: 'system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ fontSize: 28, marginBottom: 8 }}>🏋️</div>
+      <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Aristo</div>
+      <div style={{ fontSize: 13, color: '#555', marginBottom: 40 }}>Who's training?</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 280 }}>
+        {PEOPLE.map(p => (
+          <button key={p.id} onClick={() => onSelect(p)} style={{ padding: '18px 24px', background: '#111', border: '1px solid #222', borderRadius: 14, color: '#fff', fontSize: 18, fontWeight: 700, cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#1a1a1a'}
+            onMouseLeave={e => e.currentTarget.style.background = '#111'}>
+            {p.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ── Muscle highlight body icon ───────────────────────────────────────
 function MuscleIcon({ groups = [], size = 36 }) {
@@ -351,6 +375,7 @@ function ExerciseDetail({ exercise, entries, rom, isBW, onAdd, onEdit, onDelete,
 }
 
 export default function App() {
+  const [person, setPerson] = useState(null);
   const [mode, setMode] = useState("gym");
   const [history, setHistory] = useState({});
   const [romData, setRomData] = useState({});
@@ -362,17 +387,57 @@ export default function App() {
   const exercises = mode === "gym" ? GYM_EXERCISES : BW_EXERCISES;
 
   useEffect(() => {
+    if (!person) return;
+    setLoaded(false);
+    setHistory({});
+    setRomData({});
+    setSelected(null);
+    setModal(null);
     (async () => {
+      const key = storageKey(person.id);
+      // Sync from Supabase first
+      const remote = await window.sbAristo.get(person.id);
+      if (remote) {
+        const localRaw = localStorage.getItem(key);
+        // Ahmed migration: seed from old key if new key missing
+        const legacyRaw = person.id === 'ahmed' ? localStorage.getItem('gym-history-v3') : null;
+        if (!localRaw && legacyRaw) {
+          localStorage.setItem(key, legacyRaw);
+        }
+        const localKeys = Object.keys(JSON.parse(localStorage.getItem(key) || '{"history":{}}').history || {}).length;
+        const remoteKeys = Object.keys(remote.history || {}).length;
+        if (remoteKeys > localKeys) {
+          localStorage.setItem(key, JSON.stringify({ history: remote.history, rom: remote.rom }));
+        }
+      } else {
+        // Ahmed migration: seed new key from legacy key
+        if (person.id === 'ahmed' && !localStorage.getItem(key)) {
+          const legacy = localStorage.getItem('gym-history-v3');
+          if (legacy) localStorage.setItem(key, legacy);
+        }
+        // Push local to Supabase
+        const localRaw = localStorage.getItem(key);
+        if (localRaw) {
+          try { const d = JSON.parse(localRaw); window.sbAristo.upsert(person.id, d.history || {}, d.rom || {}); } catch {}
+        }
+      }
       try {
-        const res = await window.storage.get(STORAGE_KEY);
+        const res = await window.storage.get(key);
         if (res?.value) { const d = JSON.parse(res.value); setHistory(d.history || {}); setRomData(d.rom || {}); }
-        else { setHistory(INITIAL_HISTORY); await window.storage.set(STORAGE_KEY, JSON.stringify({ history: INITIAL_HISTORY, rom: {} })); }
-      } catch (_) { setHistory(INITIAL_HISTORY); }
+        else if (person.id === 'ahmed') { setHistory(INITIAL_HISTORY); await window.storage.set(key, JSON.stringify({ history: INITIAL_HISTORY, rom: {} })); }
+        else { setHistory({}); }
+      } catch (_) { setHistory({}); }
       setLoaded(true);
     })();
-  }, []);
+  }, [person]);
 
-  async function persist(h, r) { setHistory(h); setRomData(r); try { await window.storage.set(STORAGE_KEY, JSON.stringify({ history: h, rom: r })); } catch (_) {} }
+  async function persist(h, r) {
+    if (!person) return;
+    const key = storageKey(person.id);
+    setHistory(h); setRomData(r);
+    try { await window.storage.set(key, JSON.stringify({ history: h, rom: r })); } catch (_) {}
+    window.sbAristo.upsert(person.id, h, r);
+  }
 
   function addEntry(id, entry) { persist({ ...history, [id]: [...(history[id] || []), entry] }, romData); setModal(null); }
   function editEntry(id, old, nw) { const cur = history[id] || []; const idx = cur.findIndex(e => e.date === old.date && e.weight === old.weight && e.sets === old.sets); if (idx >= 0) { const n = [...cur]; n[idx] = nw; persist({ ...history, [id]: n }, romData); } setModal(null); }
@@ -382,6 +447,7 @@ export default function App() {
   function latestVal(id, field = "weight") { const h = history[id]; if (!h || !h.length) return null; return [...h].sort((a, b) => a.date.localeCompare(b.date)).pop()[field]; }
   function entryCount(id) { return (history[id] || []).length; }
 
+  if (!person) return <PersonPicker onSelect={p => setPerson(p)} />;
   if (!loaded) return <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", color: "#444" }}>Loading…</div>;
 
   const ex = selected ? [...GYM_EXERCISES, ...BW_EXERCISES].find(e => e.id === selected) : null;
@@ -389,6 +455,11 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff", fontFamily: "system-ui, -apple-system, sans-serif", padding: "16px 14px 40px", maxWidth: 520, margin: "0 auto" }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <button onClick={() => { setPerson(null); setLoaded(false); }} style={{ background: 'none', border: 'none', color: '#555', fontSize: 12, cursor: 'pointer', padding: '4px 0' }}>
+          {person.name} · switch
+        </button>
+      </div>
       {ex ? (
         <>
           <ExerciseDetail exercise={ex} entries={history[ex.id]} rom={romData[ex.id]} isBW={isBW}
