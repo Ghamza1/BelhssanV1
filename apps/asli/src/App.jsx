@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import * as f3 from 'family-chart'
+import 'family-chart/styles/family-chart.css'
 
 const C = {
   bg:'#efe6d2', surface:'#f5ede0', card:'#faf6ef', border:'#d4c8b8',
@@ -63,8 +65,6 @@ const ADMIN_PWD=import.meta.env.VITE_ASLI_ADMIN_PASSWORD||null
 const GUEST_PWD=import.meta.env.VITE_ASLI_GUEST_PASSWORD||null
 const AUTH_REQUIRED=!!(ADMIN_PWD||GUEST_PWD)
 
-const BOX={sm:[150,76],md:[180,88],lg:[210,100]}, HGAP=52, SGAP=16, VGAP=160
-
 function getFocusedData(data,fid,genUp,genDown){
   if(!fid)return data
   const byId=Object.fromEntries(data.map(p=>[p.id,p])),inc=new Set()
@@ -74,44 +74,68 @@ function getFocusedData(data,fid,genUp,genDown){
   return data.filter(p=>inc.has(p.id))
 }
 
-function getVisibleData(data,collapsed){
-  if(!collapsed.size)return data
-  const byId=Object.fromEntries(data.map(p=>[p.id,p])),hidden=new Set()
-  function hide(id){if(hidden.has(id)||!byId[id])return;hidden.add(id);byId[id].rels.children.forEach(c=>hide(c))}
-  collapsed.forEach(id=>{if(byId[id])byId[id].rels.children.forEach(c=>hide(c))})
-  return data.filter(p=>!hidden.has(p.id))
+// Convert our data format to family-chart format
+function toF3(people){
+  return people.map(p=>({
+    id:p.id,
+    data:{
+      ...p.data,
+      gender:p.data.sex,
+      'first name':p.data.first_name||'',
+      'last name':p.data.last_name||'',
+      birthday:p.data.birth?.date||'',
+    },
+    rels:{
+      spouses:p.rels.spouses||[],
+      children:p.rels.children||[],
+      parents:[p.rels.father,p.rels.mother].filter(Boolean),
+    }
+  }))
 }
 
-function computeLayout(people,boxSize='md'){
-  if(!people.length)return{positions:{},edges:[],bounds:{x:0,y:0,w:0,h:0}}
-  const[NW,NH]=BOX[boxSize],byId=Object.fromEntries(people.map(p=>[p.id,p]))
-  const gen={},hasP=new Set()
-  people.forEach(p=>{if(p.rels.father&&byId[p.rels.father])hasP.add(p.id);if(p.rels.mother&&byId[p.rels.mother])hasP.add(p.id)})
-  const roots=people.filter(p=>!hasP.has(p.id)&&!p.rels.spouses.some(s=>hasP.has(s)));if(!roots.length){const noP=people.filter(p=>!hasP.has(p.id));roots.push(noP[0]||people[0])}
-  // Process larger bio-families first so their children get placed before in-laws
-  roots.sort((a,b)=>(byId[b]?.rels.children.length||0)-(byId[a]?.rels.children.length||0))
-  const vis=new Set(),q=roots.map(r=>[r.id,0])
-  while(q.length){const[id,g]=q.shift();if(vis.has(id))continue;vis.add(id);gen[id]=g;const p=byId[id];if(!p)continue;p.rels.spouses.forEach(s=>{if(!vis.has(s)&&byId[s])q.push([s,g])});p.rels.children.forEach(c=>{if(!vis.has(c)&&byId[c])q.push([c,g+1])})}
-  people.forEach(p=>{if(gen[p.id]===undefined)gen[p.id]=0})
-  const obg={},placed=new Set()
-  // Only place in-law spouses (no parents in dataset) immediately adjacent;
-  // spouses with parents get placed when their own bio-family subtree is processed
-  function place(id){if(placed.has(id))return;placed.add(id);const g=gen[id];if(!obg[g])obg[g]=[];obg[g].push(id);const p=byId[id];if(!p)return;p.rels.spouses.forEach(s=>{if(!placed.has(s)&&byId[s]&&!hasP.has(s)){placed.add(s);obg[g].push(s)}});// Sort children: those married into another family go last so they land on the outer edge
-  const kids=[...p.rels.children].sort((a,b)=>{const aB=byId[a]?.rels.spouses.some(s=>byId[s]&&hasP.has(s))?1:0,bB=byId[b]?.rels.spouses.some(s=>byId[s]&&hasP.has(s))?1:0;return aB-bB});kids.forEach(c=>{if(!placed.has(c)&&byId[c])place(c)})}
-  roots.forEach(r=>place(r.id));people.forEach(p=>{if(!placed.has(p.id))place(p.id)})
-  // Post-process: ensure spouses in the same generation are adjacent
-  Object.keys(obg).map(Number).forEach(g=>{const done=new Set(),reord=[];(obg[g]||[]).forEach(id=>{if(done.has(id))return;done.add(id);reord.push(id);byId[id]?.rels.spouses.forEach(s=>{if(!done.has(s)&&byId[s]&&gen[s]===g){done.add(s);reord.push(s)}})});obg[g]=reord})
-  const positions={},gens=Object.keys(obg).map(Number).sort((a,b)=>a-b)
-  gens.forEach(g=>{const ids=obg[g];let cx=0;ids.forEach((id,i)=>{positions[id]={x:cx,y:g*(NH+VGAP)};if(i<ids.length-1){const p=byId[id];cx+=NW+(p&&p.rels.spouses.includes(ids[i+1])?SGAP:HGAP)}})})
-  const allX0=Object.values(positions).map(p=>p.x),off=-Math.min(...allX0)-(Math.max(...allX0)+NW-Math.min(...allX0))/2
-  Object.keys(positions).forEach(id=>{positions[id].x+=off})
-  for(let pass=0;pass<3;pass++){gens.slice().reverse().forEach(g=>{const done=new Set();(obg[g]||[]).forEach(id=>{if(done.has(id))return;const p=byId[id];if(!p||!p.rels.children.length)return;const unit=[id,...p.rels.spouses.filter(s=>gen[s]===g&&byId[s])];unit.forEach(u=>done.add(u));const kids=p.rels.children.filter(c=>positions[c]);if(!kids.length)return;const cMid=(Math.min(...kids.map(c=>positions[c].x))+Math.max(...kids.map(c=>positions[c].x))+NW)/2,uMid=(Math.min(...unit.map(u=>positions[u].x))+Math.max(...unit.map(u=>positions[u].x))+NW)/2,d=cMid-uMid;if(Math.abs(d)>1)unit.forEach(u=>{positions[u].x+=d})})})}
-  // De-collision: after centering, ensure no cards overlap within each generation
-  for(let iter=0;iter<3;iter++){gens.forEach(g=>{const ids=(obg[g]||[]).slice().sort((a,b)=>positions[a].x-positions[b].x);for(let i=1;i<ids.length;i++){const prev=positions[ids[i-1]],cur=positions[ids[i]];const isSp=byId[ids[i-1]]?.rels.spouses.includes(ids[i])||byId[ids[i]]?.rels.spouses.includes(ids[i-1]);const minX=prev.x+NW+(isSp?SGAP:HGAP);if(cur.x<minX)cur.x=minX}})}
-  const edges=[],seen=new Set()
-  people.forEach(p=>{const pp=positions[p.id];if(!pp)return;p.rels.spouses.forEach(sid=>{const k=[p.id,sid].sort().join('~');if(seen.has(k))return;seen.add(k);const sp=positions[sid];if(!sp)return;edges.push({type:'spouse',x1:pp.x+NW,y1:pp.y+NH/2,x2:sp.x,y2:sp.y+NH/2,id:k})});p.rels.children.forEach(cid=>{const k=`${p.id}>${cid}`;if(seen.has(k))return;seen.add(k);const cp=positions[cid];if(!cp)return;let cox=null;p.rels.spouses.forEach(sid=>{const sp=byId[sid];if(sp&&sp.rels.children.includes(cid))cox=positions[sid]});const mx=cox?(pp.x+NW/2+cox.x+NW/2)/2:pp.x+NW/2,my=pp.y+NH+VGAP/2;edges.push({type:'parent-child',path:`M${mx} ${pp.y+NH}L${mx} ${my}L${cp.x+NW/2} ${my}L${cp.x+NW/2} ${cp.y}`,id:k})})})
-  const axf=Object.values(positions).map(p=>p.x),ayf=Object.values(positions).map(p=>p.y)
-  return{positions,edges,NW,NH,bounds:{x:Math.min(...axf)-80,y:Math.min(...ayf)-80,w:Math.max(...axf)+NW-Math.min(...axf)+160,h:Math.max(...ayf)+NH-Math.min(...ayf)+160}}
+function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang,settings}){
+  const elRef=useRef(null)
+  const chartRef=useRef(null)
+  const chartId=useRef('f3-'+Math.random().toString(36).slice(2))
+
+  useEffect(()=>{
+    if(!elRef.current||!data.length)return
+    const el=elRef.current
+    el.innerHTML=''
+    const chart=f3.createChart('#'+chartId.current,toF3(data))
+    chart.setCardHtml().setCardDisplay([['first name','last name'],['birthday']])
+    if(focusedId)chart.updateMainId(focusedId)
+    chart.updateTree({initial:true})
+    chartRef.current=chart
+    const onClick=e=>{
+      const card=e.target.closest('.card')
+      if(!card){onPersonClick(null);return}
+      const datum=card.__data__
+      if(datum?.id)onPersonClick(datum.id)
+    }
+    el.addEventListener('click',onClick)
+    return()=>el.removeEventListener('click',onClick)
+  },[]) // eslint-disable-line
+
+  useEffect(()=>{
+    if(!chartRef.current||!data.length)return
+    chartRef.current.updateData(toF3(data))
+    chartRef.current.updateTree({})
+  },[data])
+
+  useEffect(()=>{
+    if(!chartRef.current)return
+    if(focusedId)chartRef.current.updateMainId(focusedId)
+    chartRef.current.updateTree({})
+  },[focusedId])
+
+  if(!data.length)return(
+    <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:C.muted,fontFamily:FONT[lang].body,fontSize:15}}>{t.emptyTree}</div>
+  )
+  return(
+    <div id={chartId.current} ref={elRef} className="f3"
+      style={{width:'100%',height:'100%','--f3-bg-color':EC.bg,'--f3-card-bg-color':C.card,'--f3-border-color':C.border}}/>
+  )
 }
 
 function dl(content,filename,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=filename;a.click();URL.revokeObjectURL(a.href)}
@@ -168,83 +192,6 @@ function PasswordModal({t,lang,isRTL,onLogin}){
           {ADMIN_PWD&&<button onClick={()=>try_('admin')} style={{flex:1,background:C.primary,color:C.white,border:'none',borderRadius:11,padding:'11px 14px',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:f.body}}>{t.adminMode}</button>}
           {GUEST_PWD&&<button onClick={()=>try_('guest')} style={{flex:1,background:C.surface,color:C.ink,border:`1px solid ${C.border}`,borderRadius:11,padding:'11px 14px',cursor:'pointer',fontSize:13,fontFamily:f.body}}>{t.guestMode}</button>}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function PersonCard({person,x,y,NW,NH,selected,hovered,onClick,onHover,lang,settings,EC,hasChildren,isCollapsed,onCollapseToggle}){
-  const d=person.data,name=fullName(d,settings),isMale=d.sex==='M',isDead=!!d.death
-  const accent=isMale?EC.primary:EC.accent,fill=selected?EC.primary:hovered?C.surface:C.card
-  const stroke=selected?EC.gold:hovered?EC.primary:C.border,sw=selected?2.5:hovered?1.5:1
-  const maxC=NW<160?14:NW<190?17:20,dn=name.length>maxC?name.slice(0,maxC-1)+'…':name
-  const year=d.birth?.date?.slice(0,4)||'',showYr=settings.cardDetail!=='name',showJ=settings.cardDetail==='full'&&d.job
-  const pr=NH<80?20:24,pcx=14+pr
-  return(
-    <g transform={`translate(${x},${y})`} onMouseEnter={()=>onHover(person.id)} onMouseLeave={()=>onHover(null)}>
-      <rect width={NW} height={NH} rx={11} fill={selected?C.shadow:hovered?C.shadow:'transparent'} transform="translate(2,3)" opacity={0.5}/>
-      <rect width={NW} height={NH} rx={11} fill={fill} stroke={stroke} strokeWidth={sw} onClick={e=>{e.stopPropagation();onClick(person.id)}} style={{cursor:'pointer'}}/>
-      <rect x={0} y={10} width={3.5} height={NH-20} rx={2} fill={accent} opacity={selected?0.7:0.35}/>
-      {settings.showPhotos&&d.photo?(
-        <><defs><clipPath id={`cl-${person.id}`}><circle cx={pcx} cy={NH/2} r={pr}/></clipPath></defs>
-        <image href={d.photo} x={pcx-pr} y={NH/2-pr} width={pr*2} height={pr*2} clipPath={`url(#cl-${person.id})`} preserveAspectRatio="xMidYMid slice" style={{pointerEvents:'none'}}/>
-        <circle cx={pcx} cy={NH/2} r={pr} fill="none" stroke={selected?EC.gold:accent} strokeWidth={1.5} opacity={0.5} style={{pointerEvents:'none'}}/></>
-      ):(
-        <><circle cx={pcx} cy={NH/2} r={pr} fill={accent} opacity={selected?0.25:0.1}/>
-        <text x={pcx} y={NH/2+6} textAnchor="middle" fontSize={pr} fill={accent} opacity={0.7} style={{pointerEvents:'none'}}>{isMale?'◈':'◇'}</text></>
-      )}
-      {(()=>{const tx=pcx+pr+10,ns=NW<160?12:13,ss=ns-1,yn=NH/2-(showYr||showJ?(showJ?12:7):0);return(
-        <g style={{pointerEvents:'none'}}>
-          <text x={tx} y={yn} fontSize={ns} fontWeight="700" fill={selected?C.white:EC.ink} fontFamily={FONT[lang].body}>{dn}</text>
-          {showYr&&<text x={tx} y={yn+16} fontSize={ss} fill={selected?'#ffffffbb':C.muted} fontFamily="Karla,sans-serif">{year}{isDead?' †':''}</text>}
-          {showJ&&<text x={tx} y={yn+30} fontSize={ss-1} fill={selected?'#ffffff99':C.muted} fontFamily="Karla,sans-serif">{d.job.length>16?d.job.slice(0,15)+'…':d.job}</text>}
-        </g>
-      )})()}
-      {selected&&<circle cx={NW-12} cy={12} r={5} fill={EC.gold} style={{pointerEvents:'none'}}/>}
-      {hasChildren&&(
-        <g onClick={e=>{e.stopPropagation();onCollapseToggle(person.id)}} style={{cursor:'pointer'}}>
-          <rect x={NW/2-11} y={NH-9} width={22} height={14} rx={4} fill={isCollapsed?EC.accent:EC.primary} opacity={0.85}/>
-          <text x={NW/2} y={NH+1} textAnchor="middle" fontSize={9} fill={C.white} fontWeight="700" style={{pointerEvents:'none'}}>{isCollapsed?'▶':'▼'}</text>
-        </g>
-      )}
-    </g>
-  )
-}
-
-function TreeView({visData,fullData,focusedId,onPersonClick,t,lang,settings,EC,onFitRef,collapsed,onCollapseToggle}){
-  const svgRef=useRef(null);const[vb,setVb]=useState({x:-600,y:-150,w:1400,h:900});const[hovered,setHovered]=useState(null)
-  const drag=useRef({on:false,sx:0,sy:0,svb:null}),pinch=useRef({on:false,d:0})
-  const layout=useMemo(()=>computeLayout(visData,settings.boxSize),[visData,settings.boxSize])
-  const fit=useCallback(()=>{const b=layout.bounds;if(!b||!svgRef.current)return;const r=svgRef.current.getBoundingClientRect();if(!r.width)return;const sc=Math.min(r.width/b.w,r.height/b.h,1);setVb({x:b.x+(b.w-r.width/sc)/2,y:b.y+(b.h-r.height/sc)/2,w:r.width/sc,h:r.height/sc})},[layout])
-  useEffect(()=>{if(onFitRef)onFitRef.current=fit},[fit,onFitRef])
-  useEffect(()=>{const id=setTimeout(fit,80);return()=>clearTimeout(id)},[visData.length>0])// eslint-disable-line
-  useEffect(()=>{if(!focusedId)return;const pos=layout.positions[focusedId];if(!pos)return;const[NW,NH]=BOX[settings.boxSize];setVb(v=>({...v,x:pos.x+NW/2-v.w/2,y:pos.y+NH/2-v.h/2}))},[focusedId])// eslint-disable-line
-  const sc_=useCallback(()=>{const el=svgRef.current;if(!el)return{sx:1,sy:1};const r=el.getBoundingClientRect();return{sx:vb.w/r.width,sy:vb.h/r.height}},[vb])
-  const zoom=useCallback((f,fx=.5,fy=.5)=>{setVb(v=>({x:v.x+v.w*fx-v.w*f*fx,y:v.y+v.h*fy-v.h*f*fy,w:v.w*f,h:v.h*f}))},[])
-  const onPD=e=>{if(e.target.closest('[data-card]'))return;drag.current={on:true,sx:e.clientX,sy:e.clientY,svb:{...vb}};e.currentTarget.setPointerCapture(e.pointerId)}
-  const onPM=e=>{if(!drag.current.on)return;const{sx,sy,svb}=drag.current,{sx:scx,sy:scy}=sc_();setVb(v=>({...v,x:svb.x-(e.clientX-sx)*scx,y:svb.y-(e.clientY-sy)*scy}))}
-  const onWh=e=>{e.preventDefault();const r=svgRef.current.getBoundingClientRect();zoom(e.deltaY>0?1.1:.9,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height)}
-  const onTS=e=>{if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;pinch.current={on:true,d:Math.hypot(dx,dy)}}}
-  const onTM=e=>{if(pinch.current.on&&e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY,nd=Math.hypot(dx,dy);zoom(pinch.current.d/nd);pinch.current.d=nd;e.preventDefault()}}
-  const[NW,NH]=BOX[settings.boxSize],byFull=useMemo(()=>Object.fromEntries(fullData.map(p=>[p.id,p])),[fullData])
-  if(!visData.length)return<div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:C.muted,fontFamily:FONT[lang].body,fontSize:15}}>{t.emptyTree}</div>
-  return(
-    <div style={{flex:1,position:'relative',overflow:'hidden'}}>
-      <svg ref={svgRef} viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} style={{width:'100%',height:'100%',display:'block',touchAction:'none',background:EC.bg,cursor:drag.current.on?'grabbing':'grab'}}
-        onPointerDown={onPD} onPointerMove={onPM} onPointerUp={()=>{drag.current.on=false}}
-        onWheel={onWh} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={()=>{pinch.current.on=false}}
-        onClick={()=>onPersonClick(null)}>
-        <defs><pattern id="g" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke={C.gridLine} strokeWidth=".5" opacity=".5"/></pattern></defs>
-        <rect x={vb.x-3000} y={vb.y-3000} width={vb.w+6000} height={vb.h+6000} fill="url(#g)"/>
-        {layout.edges.map(e=>e.type==='spouse'?<line key={e.id} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke={EC.gold} strokeWidth={2} strokeDasharray="6 4"/>:<path key={e.id} d={e.path} stroke={C.muted} strokeWidth={1.5} fill="none" opacity={.5}/>)}
-        {visData.map(p=>{const pos=layout.positions[p.id];if(!pos)return null;const fp=byFull[p.id]||p;return(
-          <g key={p.id} data-card="1"><PersonCard person={p} x={pos.x} y={pos.y} NW={NW} NH={NH} selected={p.id===focusedId} hovered={p.id===hovered} onClick={onPersonClick} onHover={setHovered} lang={lang} settings={settings} EC={EC} hasChildren={fp.rels.children.some(c=>byFull[c])} isCollapsed={collapsed.has(p.id)} onCollapseToggle={onCollapseToggle}/></g>
-        )})}
-      </svg>
-      <div style={{position:'absolute',bottom:16,right:16,display:'flex',flexDirection:'column',gap:6}}>
-        {[{l:'⊡',a:fit},{l:'+',a:()=>zoom(.85)},{l:'−',a:()=>zoom(1.18)}].map(b=>(
-          <button key={b.l} onClick={b.a} style={{width:38,height:38,borderRadius:10,border:`1px solid ${C.border}`,background:C.card,color:EC.primary,fontSize:18,cursor:'pointer',boxShadow:`0 2px 8px ${C.shadow}`,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{b.l}</button>
-        ))}
       </div>
     </div>
   )
@@ -460,10 +407,8 @@ export default function App(){
   const[addRel,setAddRel]      =useState(null)
   const[showSettings,setShowS] =useState(false)
   const[focusedView,setFV]     =useState(false)
-  const[collapsed,setCollapsed]=useState(new Set())
   const[role,setRole]          =useState(()=>AUTH_REQUIRED?null:'admin')
   const[syncStatus,setSyncStatus]=useState(null)
-  const fitRef=useRef(null)
   const isRTL=lang==='ar',t=T[lang]
   const EC=useMemo(()=>({...C,...(settings.colors||{})}),[settings.colors])
 
@@ -515,7 +460,7 @@ export default function App(){
     setTimeout(()=>setSyncStatus(null),3000)
   },[families,currentFamId])
 
-  const openFamily=useCallback(id=>{setCurFam(id);setFocused(null);setCollapsed(new Set());setFV(false)},[])
+  const openFamily=useCallback(id=>{setCurFam(id);setFocused(null);setFV(false)},[])
   const createFamily=useCallback(name=>{
     const id=genId(),fam={id,name,data:[],updatedAt:Date.now()}
     setFamilies(prev=>{const next=[...prev,fam];saveFamilies(next);return next})
@@ -540,12 +485,11 @@ export default function App(){
 
   const editPerson=useCallback((id,pd)=>updData(data.map(p=>p.id===id?{...p,data:pd}:p)),[data,updData])
   const deletePerson=useCallback(id=>{if(!window.confirm(t.deleteWarn))return;updData(data.filter(p=>p.id!==id).map(p=>({...p,rels:{father:p.rels.father===id?null:p.rels.father,mother:p.rels.mother===id?null:p.rels.mother,spouses:p.rels.spouses.filter(s=>s!==id),children:p.rels.children.filter(c=>c!==id)}})));setFocused(null)},[data,updData,t.deleteWarn])
-  const toggleCollapsed=useCallback(id=>{setCollapsed(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n})},[])
 
-  const handleImportJSON=()=>pickFile('.json',txt=>{try{const p=JSON.parse(txt);if(!Array.isArray(p))throw 0;if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set());setFV(false)}}catch{alert('Invalid JSON')}})
-  const handleImportGEDCOM=()=>pickFile('.ged,.gedcom',txt=>{const p=parseGEDCOM(txt);if(!p.length){alert('No data found');return}if(window.confirm(t.importWarning)){updData(p);setFocused(null);setCollapsed(new Set());setFV(false)}})
+  const handleImportJSON=()=>pickFile('.json',txt=>{try{const p=JSON.parse(txt);if(!Array.isArray(p))throw 0;if(window.confirm(t.importWarning)){updData(p);setFocused(null);setFV(false)}}catch{alert('Invalid JSON')}})
+  const handleImportGEDCOM=()=>pickFile('.ged,.gedcom',txt=>{const p=parseGEDCOM(txt);if(!p.length){alert('No data found');return}if(window.confirm(t.importWarning)){updData(p);setFocused(null);setFV(false)}})
 
-  const visData=useMemo(()=>{let d=data;if(focusedView&&focusedId)d=getFocusedData(d,focusedId,settings.genUp,settings.genDown);return getVisibleData(d,collapsed)},[data,focusedView,focusedId,settings.genUp,settings.genDown,collapsed])
+  const visData=useMemo(()=>{if(focusedView&&focusedId)return getFocusedData(data,focusedId,settings.genUp,settings.genDown);return data},[data,focusedView,focusedId,settings.genUp,settings.genDown])
 
   const focusedPerson=data.find(p=>p.id===focusedId)
   const editingPerson=data.find(p=>p.id===editingId)
@@ -557,7 +501,7 @@ export default function App(){
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:EC.bg,overflow:'hidden'}}>
       <Header t={t} lang={lang} setLang={l=>setLang(l)} isRTL={isRTL} data={data} EC={EC} role={role} settings={settings} focusedId={focusedId} focusedView={focusedView} currentFamName={currentFamily?.name} onAdd={()=>setAddRel({type:'root',relativeId:null})} onSettings={()=>setShowS(true)} onFocusPerson={id=>{setFocused(id);if(!id)setFV(false)}} onLogout={()=>setRole(null)} onToggleFocused={()=>setFV(v=>!v)} onBackToFamilies={()=>setCurFam(null)} onSave={handleSave} syncStatus={syncStatus}/>
       <div style={{flex:1,position:'relative',overflow:'hidden'}}>
-        <TreeView visData={visData} fullData={data} focusedId={focusedId} onPersonClick={id=>setFocused(id===focusedId?null:id)} t={t} lang={lang} settings={settings} EC={EC} onFitRef={fitRef} collapsed={collapsed} onCollapseToggle={toggleCollapsed}/>
+        <FamilyChartView data={visData} focusedId={focusedId} onPersonClick={id=>setFocused(id===focusedId?null:id)} EC={EC} t={t} lang={lang} settings={settings}/>
         {focusedPerson&&!editingId&&!addRel&&!showSettings&&(
           <Sidebar person={focusedPerson} data={data} t={t} lang={lang} isRTL={isRTL} EC={EC} role={role} settings={settings} onClose={()=>{setFocused(null);setFV(false)}} onEdit={()=>{setEditing(focusedId);setFocused(null)}} onDelete={()=>deletePerson(focusedId)} onNavigate={id=>setFocused(id)} onAddRelative={type=>{setAddRel({type,relativeId:focusedId});setFocused(null)}}/>
         )}
