@@ -93,10 +93,11 @@ function toF3(people){
   }))
 }
 
-function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang,settings}){
+function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang}){
   const elRef=useRef(null)
   const chartRef=useRef(null)
   const chartId=useRef('f3-'+Math.random().toString(36).slice(2))
+  const onClickRef=useRef(null)
 
   useEffect(()=>{
     if(!elRef.current||!data.length)return
@@ -104,30 +105,30 @@ function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang,settings}){
     el.innerHTML=''
     const chart=f3.createChart('#'+chartId.current,toF3(data))
     chart.setCardHtml().setCardDisplay([['first name','last name'],['birthday']])
-    if(focusedId)chart.updateMainId(focusedId)
     chart.updateTree({initial:true})
     chartRef.current=chart
+
+    // D3 binds datum to the <g> ancestor of .card, traverse up to find it
     const onClick=e=>{
-      const card=e.target.closest('.card')
-      if(!card){onPersonClick(null);return}
-      const datum=card.__data__
-      if(datum?.id)onPersonClick(datum.id)
+      let node=e.target
+      while(node&&node!==el){
+        if(node.__data__?.id){onClickRef.current?.(node.__data__.id);return}
+        node=node.parentElement
+      }
+      onClickRef.current?.(null)
     }
     el.addEventListener('click',onClick)
     return()=>el.removeEventListener('click',onClick)
   },[]) // eslint-disable-line
+
+  // Keep click callback fresh without re-attaching listener
+  useEffect(()=>{onClickRef.current=onPersonClick},[onPersonClick])
 
   useEffect(()=>{
     if(!chartRef.current||!data.length)return
     chartRef.current.updateData(toF3(data))
     chartRef.current.updateTree({})
   },[data])
-
-  useEffect(()=>{
-    if(!chartRef.current)return
-    if(focusedId)chartRef.current.updateMainId(focusedId)
-    chartRef.current.updateTree({})
-  },[focusedId])
 
   if(!data.length)return(
     <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:C.muted,fontFamily:FONT[lang].body,fontSize:15}}>{t.emptyTree}</div>
@@ -417,18 +418,33 @@ export default function App(){
 
   useEffect(()=>{localStorage.setItem('asli-lang',lang);document.documentElement.lang=lang;document.documentElement.dir=isRTL?'rtl':'ltr'},[lang,isRTL])
   useEffect(()=>saveSettings(settings),[settings])
+  useEffect(()=>{
+    const onKey=e=>{if(e.key==='Escape'){setFocused(null);setFV(false);setEditing(null);setAddRel(null);setShowS(false)}}
+    window.addEventListener('keydown',onKey)
+    return()=>window.removeEventListener('keydown',onKey)
+  },[])
+
+  // Track which IDs were last seen in remote, so we can detect remote deletions
+  const REMOTE_SEEN_KEY='asli-remote-seen-v1'
+  function getRemoteSeen(){try{return new Set(JSON.parse(localStorage.getItem(REMOTE_SEEN_KEY)||'[]'))}catch{return new Set()}}
 
   // On mount: bidirectional sync with Supabase
   useEffect(()=>{
     if(!HAS_SB)return
     sbGet().then(remote=>{
       setFamilies(local=>{
-        const remoteById=Object.fromEntries((Array.isArray(remote)?remote:[]).map(r=>[r.id,r]))
+        const remoteArr=Array.isArray(remote)?remote:[]
+        const remoteById=Object.fromEntries(remoteArr.map(r=>[r.id,r]))
         const localById=Object.fromEntries(local.map(f=>[f.id,f]))
-        // Push any local families not in Supabase (e.g. migrated fam-default)
-        local.forEach(lf=>{if(!remoteById[lf.id])sbUpsert(lf)})
-        // Merge: remote wins when its updated_at is newer
+        const prevSeen=getRemoteSeen()
+        // Save current remote IDs for next sync
+        localStorage.setItem(REMOTE_SEEN_KEY,JSON.stringify(Object.keys(remoteById)))
+        // Push local families that never existed in remote (newly created locally)
+        local.forEach(lf=>{if(!remoteById[lf.id]&&!prevSeen.has(lf.id))sbUpsert(lf)})
+        // Merge: remote wins when newer; skip families deleted in remote
         const merged={...localById}
+        // Remove local families that were in remote before but are gone now (deleted remotely)
+        local.forEach(lf=>{if(!remoteById[lf.id]&&prevSeen.has(lf.id))delete merged[lf.id]})
         Object.values(remoteById).forEach(rf=>{
           const lf=localById[rf.id]
           const remoteTs=new Date(rf.updated_at).getTime()
