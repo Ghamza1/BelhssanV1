@@ -41,7 +41,7 @@ const SB_KEY=import.meta.env.VITE_SUPABASE_ANON_KEY||''
 const HAS_SB=!!(SB_URL&&SB_KEY)
 const sbH={apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,'Content-Type':'application/json'}
 async function sbGet(){if(!HAS_SB)return null;try{const r=await fetch(`${SB_URL}/rest/v1/families?select=*`,{headers:sbH});if(!r.ok)return null;return r.json()}catch{return null}}
-async function sbUpsert(f){if(!HAS_SB)return;try{await fetch(`${SB_URL}/rest/v1/families`,{method:'POST',headers:{...sbH,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:f.id,name:f.name,data:f.data})})}catch{}}
+async function sbUpsert(f){if(!HAS_SB)return;try{await fetch(`${SB_URL}/rest/v1/families`,{method:'POST',headers:{...sbH,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:f.id,name:f.name,data:f.data,updated_at:new Date().toISOString()})})}catch{}}
 async function sbDelete(id){if(!HAS_SB)return;try{await fetch(`${SB_URL}/rest/v1/families?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:sbH})}catch{}}
 
 function loadFamilies(){
