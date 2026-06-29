@@ -455,7 +455,10 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff", fontFamily: "system-ui, -apple-system, sans-serif", padding: "16px 14px 40px", maxWidth: 520, margin: "0 auto" }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <span title={window.sbAristo?.hasSupabase ? 'Cloud sync on' : 'Cloud sync off — check env vars'} style={{ fontSize: 10, color: window.sbAristo?.hasSupabase ? '#22c55e' : '#ef4444' }}>
+          {window.sbAristo?.hasSupabase ? '● cloud' : '● local only'}
+        </span>
         <button onClick={() => { setPerson(null); setLoaded(false); }} style={{ background: 'none', border: 'none', color: '#555', fontSize: 12, cursor: 'pointer', padding: '4px 0' }}>
           {person.name} · switch
         </button>

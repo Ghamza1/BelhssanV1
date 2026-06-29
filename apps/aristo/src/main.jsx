@@ -8,24 +8,29 @@ const HAS_SB = !!(SB_URL && SB_KEY)
 const sbH = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' }
 
 window.sbAristo = {
+  hasSupabase: HAS_SB,
   async get(personId) {
-    if (!HAS_SB) return null
+    if (!HAS_SB) { console.warn('[Aristo] Supabase not configured'); return null }
     try {
       const r = await fetch(`${SB_URL}/rest/v1/aristo_history?id=eq.${encodeURIComponent(personId)}&select=*`, { headers: sbH })
-      if (!r.ok) return null
+      console.log('[Aristo] GET', personId, r.status)
+      if (!r.ok) { console.error('[Aristo] GET failed', await r.text()); return null }
       const rows = await r.json()
+      console.log('[Aristo] GET rows', rows.length)
       return rows[0] || null
-    } catch { return null }
+    } catch(e) { console.error('[Aristo] GET error', e); return null }
   },
   async upsert(personId, history, rom) {
     if (!HAS_SB) return
     try {
-      await fetch(`${SB_URL}/rest/v1/aristo_history`, {
+      const r = await fetch(`${SB_URL}/rest/v1/aristo_history`, {
         method: 'POST',
         headers: { ...sbH, Prefer: 'resolution=merge-duplicates' },
         body: JSON.stringify({ id: personId, history, rom, updated_at: new Date().toISOString() })
       })
-    } catch {}
+      console.log('[Aristo] UPSERT', personId, r.status)
+      if (!r.ok) console.error('[Aristo] UPSERT failed', await r.text())
+    } catch(e) { console.error('[Aristo] UPSERT error', e) }
   }
 }
 
