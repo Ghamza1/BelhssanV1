@@ -99,28 +99,27 @@ function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang}){
   const chartId=useRef('f3-'+Math.random().toString(36).slice(2))
   const onClickRef=useRef(null)
 
+  // Init when data first becomes non-empty (handles empty-family case)
   useEffect(()=>{
-    if(!elRef.current||!data.length)return
+    if(chartRef.current||!elRef.current||!data.length)return
     const el=elRef.current
     el.innerHTML=''
     const chart=f3.createChart('#'+chartId.current,toF3(data))
     const card=chart.setCardHtml()
-    // Use library's built-in click callback (d.data.id = person id)
+    // Let library re-center on click AND open our sidebar
     card.setOnCardClick((e,d)=>{
-      e.stopPropagation()
+      card.onCardClickDefault(e,d)
       onClickRef.current?.(d.data.id)
     })
     card.setCardDisplay([['first name','last name'],['birthday']])
     chart.updateTree({initial:true})
     chartRef.current=chart
+    cardRef.current=card
 
-    // Background click → deselect
-    const onBgClick=e=>{
-      if(!e.target.closest('.card'))onClickRef.current?.(null)
-    }
+    const onBgClick=e=>{if(!e.target.closest('.card'))onClickRef.current?.(null)}
     el.addEventListener('click',onBgClick)
     return()=>el.removeEventListener('click',onBgClick)
-  },[]) // eslint-disable-line
+  },[data]) // eslint-disable-line
 
   useEffect(()=>{onClickRef.current=onPersonClick},[onPersonClick])
 
@@ -380,7 +379,6 @@ function Header({t,lang,setLang,isRTL,data,EC,role,settings,focusedId,focusedVie
         <div style={{fontSize:18,fontWeight:700,color:C.white,fontFamily:f.display,lineHeight:1}}>{currentFamName||t.app}</div>
         <div style={{fontSize:9,color:`${C.white}77`,fontFamily:'Karla,sans-serif',letterSpacing:1}}>{t.tagline.toUpperCase()}</div>
       </div>
-      {focusedId&&<button onClick={onToggleFocused} title={focusedView?t.viewFull:t.viewPartial} style={{background:focusedView?EC.gold:'transparent',color:C.white,border:`1px solid ${focusedView?EC.gold:`${C.white}44`}`,borderRadius:7,padding:'4px 8px',cursor:'pointer',fontSize:10,fontFamily:'Karla,sans-serif',fontWeight:600}}>{focusedView?'◎':'○'}</button>}
       <div style={{position:'relative'}}>
         <button onClick={()=>setOpen(x=>!x)} style={{...SX.iconBtn,color:C.white,opacity:.85}}>🔍</button>
         {open&&<div style={{position:'absolute',top:'110%',[isRTL?'left':'right']:0,width:280,background:C.white,borderRadius:12,boxShadow:`0 8px 32px ${C.shadow}`,zIndex:300,overflow:'hidden'}}>
