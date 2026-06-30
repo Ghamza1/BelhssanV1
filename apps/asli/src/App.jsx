@@ -104,24 +104,24 @@ function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang}){
     const el=elRef.current
     el.innerHTML=''
     const chart=f3.createChart('#'+chartId.current,toF3(data))
-    chart.setCardHtml().setCardDisplay([['first name','last name'],['birthday']])
+    const card=chart.setCardHtml()
+    // Use library's built-in click callback (d.data.id = person id)
+    card.setOnCardClick((e,d)=>{
+      e.stopPropagation()
+      onClickRef.current?.(d.data.id)
+    })
+    card.setCardDisplay([['first name','last name'],['birthday']])
     chart.updateTree({initial:true})
     chartRef.current=chart
 
-    // D3 binds datum to the <g> ancestor of .card, traverse up to find it
-    const onClick=e=>{
-      let node=e.target
-      while(node&&node!==el){
-        if(node.__data__?.id){onClickRef.current?.(node.__data__.id);return}
-        node=node.parentElement
-      }
-      onClickRef.current?.(null)
+    // Background click → deselect
+    const onBgClick=e=>{
+      if(!e.target.closest('.card'))onClickRef.current?.(null)
     }
-    el.addEventListener('click',onClick)
-    return()=>el.removeEventListener('click',onClick)
+    el.addEventListener('click',onBgClick)
+    return()=>el.removeEventListener('click',onBgClick)
   },[]) // eslint-disable-line
 
-  // Keep click callback fresh without re-attaching listener
   useEffect(()=>{onClickRef.current=onPersonClick},[onPersonClick])
 
   useEffect(()=>{
@@ -437,14 +437,16 @@ export default function App(){
         const remoteById=Object.fromEntries(remoteArr.map(r=>[r.id,r]))
         const localById=Object.fromEntries(local.map(f=>[f.id,f]))
         const prevSeen=getRemoteSeen()
+        const hasPrevSeen=prevSeen.size>0
         // Save current remote IDs for next sync
         localStorage.setItem(REMOTE_SEEN_KEY,JSON.stringify(Object.keys(remoteById)))
         // Push local families that never existed in remote (newly created locally)
-        local.forEach(lf=>{if(!remoteById[lf.id]&&!prevSeen.has(lf.id))sbUpsert(lf)})
+        // Only push if we've synced before — otherwise remote might have deleted them intentionally
+        local.forEach(lf=>{if(!remoteById[lf.id]&&(!hasPrevSeen||!prevSeen.has(lf.id)))sbUpsert(lf)})
         // Merge: remote wins when newer; skip families deleted in remote
         const merged={...localById}
-        // Remove local families that were in remote before but are gone now (deleted remotely)
-        local.forEach(lf=>{if(!remoteById[lf.id]&&prevSeen.has(lf.id))delete merged[lf.id]})
+        // Remove local families deleted remotely (only when we have a previous sync baseline)
+        local.forEach(lf=>{if(hasPrevSeen&&!remoteById[lf.id]&&prevSeen.has(lf.id))delete merged[lf.id]})
         Object.values(remoteById).forEach(rf=>{
           const lf=localById[rf.id]
           const remoteTs=new Date(rf.updated_at).getTime()
