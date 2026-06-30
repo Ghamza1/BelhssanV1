@@ -99,14 +99,20 @@ function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang}){
   const chartId=useRef('f3-'+Math.random().toString(36).slice(2))
   const onClickRef=useRef(null)
 
-  // Init when data first becomes non-empty (handles empty-family case)
+  // Attach bg-click once (el always exists since we always render the div)
+  useEffect(()=>{
+    const el=elRef.current
+    if(!el)return
+    const h=e=>{if(!e.target.closest('.card'))onClickRef.current?.(null)}
+    el.addEventListener('click',h)
+    return()=>el.removeEventListener('click',h)
+  },[])
+
+  // Init chart when data first becomes non-empty
   useEffect(()=>{
     if(chartRef.current||!elRef.current||!data.length)return
-    const el=elRef.current
-    el.innerHTML=''
     const chart=f3.createChart('#'+chartId.current,toF3(data))
     const card=chart.setCardHtml()
-    // Let library re-center on click AND open our sidebar
     card.setOnCardClick((e,d)=>{
       card.onCardClickDefault(e,d)
       onClickRef.current?.(d.data.id)
@@ -114,27 +120,24 @@ function FamilyChartView({data,focusedId,onPersonClick,EC,t,lang}){
     card.setCardDisplay([['first name','last name'],['birthday']])
     chart.updateTree({initial:true})
     chartRef.current=chart
-    cardRef.current=card
-
-    const onBgClick=e=>{if(!e.target.closest('.card'))onClickRef.current?.(null)}
-    el.addEventListener('click',onBgClick)
-    return()=>el.removeEventListener('click',onBgClick)
   },[data]) // eslint-disable-line
 
-  useEffect(()=>{onClickRef.current=onPersonClick},[onPersonClick])
-
+  // Update chart when data changes after init
   useEffect(()=>{
     if(!chartRef.current||!data.length)return
     chartRef.current.updateData(toF3(data))
     chartRef.current.updateTree({})
   },[data])
 
-  if(!data.length)return(
-    <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:C.muted,fontFamily:FONT[lang].body,fontSize:15}}>{t.emptyTree}</div>
-  )
+  useEffect(()=>{onClickRef.current=onPersonClick},[onPersonClick])
+
+  // Always render the chart div so elRef is always set
   return(
-    <div id={chartId.current} ref={elRef} className="f3"
-      style={{width:'100%',height:'100%','--f3-bg-color':EC.bg,'--f3-card-bg-color':C.card,'--f3-border-color':C.border}}/>
+    <div style={{position:'relative',width:'100%',height:'100%'}}>
+      <div id={chartId.current} ref={elRef} className="f3"
+        style={{width:'100%',height:'100%','--f3-bg-color':EC.bg,'--f3-card-bg-color':C.card,'--f3-border-color':C.border}}/>
+      {!data.length&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',color:C.muted,fontFamily:FONT[lang].body,fontSize:15,pointerEvents:'none'}}>{t.emptyTree}</div>}
+    </div>
   )
 }
 
