@@ -1,8 +1,10 @@
 {
-  "buildCommand": "cd apps/aristo && npm install && npm run build && cd ../.. && mkdir -p public_out/aristo && cp -r apps/aristo/dist/. public_out/aristo/ && cp apps/landing/index.html public_out/index.html",
+  "buildCommand": "bash build.sh",
   "outputDirectory": "public_out",
   "rewrites": [
     { "source": "/aristo", "destination": "/aristo/index.html" },
-    { "source": "/aristo/(.*)", "destination": "/aristo/$1" }
+    { "source": "/aristo/(.*)", "destination": "/aristo/$1" },
+    { "source": "/asli", "destination": "/asli/index.html" },
+    { "source": "/asli/(.*)", "destination": "/asli/$1" }
   ]
 }
